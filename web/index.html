@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sorting Hat · AI 人设分院仪式</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600&family=Noto+Serif+SC:wght@400;600&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+  --bg-darkest:     #080705;
+  --bg-dark:        #100e0b;
+  --bg-card:        #1a1710;
+  --bg-elevated:    #221e15;
+
+  --gold-bright:    #f2c94c;
+  --gold-primary:   #c9a84c;
+  --gold-muted:     #8b6e20;
+  --gold-dim:       #4a3a10;
+
+  --text-primary:   #f0e8cc;
+  --text-secondary: #b8a87a;
+  --text-muted:     #7a6840;
+
+  --teal:           #5ecfcf;
+  --purple:         #9b7fd4;
+  --green:          #6bbf7a;
+  --red-soft:       #c97070;
+
+  --border-gold:    rgba(201, 168, 76, 0.35);
+  --border-dim:     rgba(201, 168, 76, 0.12);
+  --glow-gold:      rgba(201, 168, 76, 0.55);
+  --glow-teal:      rgba(94, 207, 207, 0.4);
+}
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+  background-color: var(--bg-darkest);
+  background-image:
+    radial-gradient(ellipse 80% 40% at 50% -5%,
+      rgba(201, 168, 76, 0.10) 0%, transparent 70%),
+    radial-gradient(ellipse 100% 50% at 50% 110%,
+      rgba(0, 0, 0, 0.6) 0%, transparent 70%);
+  color: var(--text-primary);
+  font-family: 'Noto Serif SC', 'Cormorant Garamond', serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1rem 4rem;
+}
+
+  /* ── 标题区 ── */
+  .hero {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    animation: fadeDown 1s ease both;
+  }
+
+  .hat-emoji {
+    font-size: 5rem;
+    display: block;
+    margin-bottom: 0.5rem;
+    filter: drop-shadow(0 0 18px rgba(201,168,76,0.7));
+    animation: float 4s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%,100% { transform: translateY(0); }
+    50%      { transform: translateY(-10px); }
+  }
+
+  h1 {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(1.6rem, 4vw, 2.8rem);
+    color: var(--gold-primary);
+    letter-spacing: 0.08em;
+    text-shadow: 0 0 8px var(--gold-primary), 0 0 24px rgba(201,168,76,0.4);
+    line-height: 1.3;
+  }
+
+  .subtitle {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    letter-spacing: 0.2em;
+    margin-top: 0.6rem;
+    text-transform: uppercase;
+  }
+
+  .divider {
+    width: 320px;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--gold-primary), transparent);
+    margin: 1.2rem auto;
+    opacity: 0.6;
+  }
+
+  /* ── 卡片 ── */
+  .card {
+    background: var(--bg-medium);
+    border: 1px solid var(--border-gold);
+    border-radius: 4px;
+    box-shadow: 0 0 20px rgba(201,168,76,0.12), inset 0 0 60px rgba(0,0,0,0.4);
+    padding: 2rem 2.5rem;
+    width: 100%;
+    max-width: 680px;
+    position: relative;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .card::before, .card::after {
+    content: '✦';
+    position: absolute;
+    color: var(--gold-muted);
+    font-size: 0.7rem;
+    opacity: 0.6;
+  }
+  .card::before { top: 10px; left: 14px; }
+  .card::after  { bottom: 10px; right: 14px; }
+
+  /* ── 欢迎页 ── */
+  .welcome-text {
+    font-family: 'IM Fell English', serif;
+    font-size: 1.05rem;
+    line-height: 1.9;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+  }
+
+  .welcome-text em {
+    color: var(--gold-primary);
+    font-style: normal;
+  }
+
+  .version-btns {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .version-card {
+    flex: 1;
+    min-width: 200px;
+    background: rgba(201,168,76,0.05);
+    border: 1px solid rgba(201,168,76,0.25);
+    border-radius: 3px;
+    padding: 1.2rem 1.4rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+  }
+
+  .version-card:hover {
+    background: rgba(201,168,76,0.1);
+    border-color: var(--gold-muted);
+  }
+
+  .version-card.selected {
+    background: rgba(201,168,76,0.15);
+    border-color: var(--gold-primary);
+    box-shadow: 0 0 14px rgba(201,168,76,0.25);
+  }
+
+  .version-card .version-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.95rem;
+    letter-spacing: 0.08em;
+    color: var(--text-primary);
+    margin-bottom: 0.3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .version-card.selected .version-title {
+    color: var(--gold-bright);
+    text-shadow: 0 0 8px var(--gold-primary);
+  }
+
+  .version-card .version-meta {
+    font-family: 'Cinzel', serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    color: var(--text-muted);
+    margin-bottom: 0.6rem;
+  }
+
+  .version-card .version-desc {
+    font-family: 'IM Fell English', serif;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    font-style: italic;
+  }
+
+  .version-card.selected .version-desc {
+    color: var(--text-primary);
+  }
+
+  .btn-confirm {
+    width: 100%;
+    margin-top: 1.2rem;
+    background: rgba(201,168,76,0.06);
+    border: 1px solid rgba(201,168,76,0.2);
+    color: var(--text-muted);
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    letter-spacing: 0.15em;
+    padding: 0.85rem;
+    border-radius: 2px;
+    cursor: not-allowed;
+    transition: all 0.3s ease;
+  }
+
+  .btn-confirm.ready {
+    background: rgba(201,168,76,0.12);
+    border-color: var(--gold-primary);
+    color: var(--gold-bright);
+    cursor: pointer;
+  }
+
+  .btn-confirm.ready:hover {
+    background: rgba(201,168,76,0.25);
+    box-shadow: 0 0 16px var(--glow-gold);
+    text-shadow: 0 0 8px var(--gold-primary);
+  }
+
+  /* ── 按钮 ── */
+  .btn-primary {
+    flex: 1;
+    min-width: 160px;
+    background: rgba(201,168,76,0.1);
+    border: 1px solid var(--gold-primary);
+    color: var(--gold-bright);
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    letter-spacing: 0.1em;
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+    text-align: center;
+  }
+
+  .btn-primary:hover {
+    background: rgba(201,168,76,0.22);
+    box-shadow: 0 0 14px var(--glow-gold);
+    text-shadow: 0 0 8px var(--gold-primary);
+  }
+
+  .btn-secondary {
+    flex: 1;
+    min-width: 160px;
+    background: transparent;
+    border: 1px solid var(--border-gold);
+    color: var(--text-secondary);
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    letter-spacing: 0.1em;
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+    text-align: center;
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--gold-muted);
+    color: var(--text-primary);
+  }
+
+  /* ── 进度条 ── */
+  .progress-wrap {
+    margin-bottom: 1.8rem;
+  }
+
+  .progress-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+  }
+
+  .progress-bar-bg {
+    height: 4px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(to right, var(--gold-muted), var(--gold-bright));
+    border-radius: 2px;
+    width: 100%;
+    transform-origin: left;
+    transform: scaleX(0);
+    transition: transform 0.5s ease;
+    box-shadow: 0 0 8px var(--glow-gold);
+  }
+
+  /* ── 题目 ── */
+  .phase-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    color: var(--gold-muted);
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+
+  .question-num {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    color: var(--gold-primary);
+    margin-bottom: 0.6rem;
+    letter-spacing: 0.1em;
+  }
+
+  .question-text {
+    font-family: 'IM Fell English', serif;
+    font-size: 1.15rem;
+    line-height: 1.7;
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+  }
+
+  /* ── 选项 ── */
+  .options { display: flex; flex-direction: column; gap: 0.65rem; }
+
+  .option-btn {
+    background: rgba(201,168,76,0.05);
+    border: 1px solid rgba(201,168,76,0.25);
+    color: var(--text-secondary);
+    font-family: 'IM Fell English', serif;
+    font-size: 1rem;
+    line-height: 1.6;
+    padding: 0.85rem 1.1rem;
+    cursor: pointer;
+    border-radius: 2px;
+    text-align: left;
+    transition: all 0.25s ease;
+    display: flex;
+    gap: 0.8rem;
+    align-items: flex-start;
+  }
+
+  .option-btn:hover {
+    background: rgba(201,168,76,0.13);
+    border-color: var(--gold-primary);
+    color: var(--text-primary);
+    box-shadow: 0 0 10px rgba(201,168,76,0.2);
+  }
+
+  .option-btn.selected {
+    background: rgba(201,168,76,0.18);
+    border-color: var(--gold-bright);
+    color: var(--gold-bright);
+    box-shadow: 0 0 14px rgba(201,168,76,0.35);
+  }
+
+  .option-letter {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    color: var(--gold-muted);
+    min-width: 1.2rem;
+    padding-top: 0.1rem;
+  }
+
+  .option-btn.selected .option-letter { color: var(--gold-bright); }
+
+  /* ── 开放题输入框 ── */
+  .open-input {
+    width: 100%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border-gold);
+    border-radius: 2px;
+    color: var(--text-primary);
+    font-family: 'IM Fell English', serif;
+    font-size: 1rem;
+    padding: 0.85rem 1rem;
+    outline: none;
+    transition: all 0.3s ease;
+    resize: vertical;
+    min-height: 70px;
+  }
+
+  .open-input:focus {
+    border-color: var(--gold-primary);
+    box-shadow: 0 0 10px rgba(201,168,76,0.2);
+  }
+
+  .skip-hint {
+    font-family: 'IM Fell English', serif;
+    font-size: 0.85rem;
+    font-style: italic;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+  }
+
+  /* ── 导航按钮 ── */
+  .nav-btns {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1.8rem;
+    gap: 1rem;
+  }
+
+  .btn-next {
+    background: rgba(201,168,76,0.12);
+    border: 1px solid var(--gold-primary);
+    color: var(--gold-bright);
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.12em;
+    padding: 0.7rem 2rem;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+  }
+
+  .btn-next:hover {
+    background: rgba(201,168,76,0.25);
+    box-shadow: 0 0 14px var(--glow-gold);
+  }
+
+  .btn-back {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text-muted);
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    padding: 0.7rem 1.5rem;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.25s ease;
+  }
+
+  .btn-back:hover { color: var(--text-secondary); border-color: var(--border-gold); }
+
+  /* ── 结果页 ── */
+  .result-section { margin-bottom: 1.5rem; }
+
+  .result-section h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    color: var(--gold-primary);
+    text-transform: uppercase;
+    margin-bottom: 0.7rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+  }
+
+  .result-section p {
+    font-family: 'IM Fell English', serif;
+    font-size: 1rem;
+    line-height: 1.8;
+    color: var(--text-secondary);
+  }
+
+  .result-section p strong {
+    color: var(--text-primary);
+    font-style: normal;
+  }
+
+  .success-msg {
+    background: rgba(201,168,76,0.08);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 2px;
+    padding: 1rem 1.2rem;
+    font-family: 'Cinzel', serif;
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    color: var(--gold-primary);
+    text-align: center;
+    margin-top: 1.5rem;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 8px rgba(201,168,76,0.2); }
+    50%      { box-shadow: 0 0 20px rgba(201,168,76,0.4); }
+  }
+
+  .error-msg {
+    background: rgba(180,60,60,0.1);
+    border: 1px solid rgba(180,60,60,0.4);
+    border-radius: 2px;
+    padding: 0.8rem 1.2rem;
+    font-family: 'IM Fell English', serif;
+    font-size: 0.95rem;
+    color: #e08080;
+    margin-top: 1rem;
+  }
+
+  /* ── 加载动画 ── */
+  .generating {
+    text-align: center;
+    padding: 2rem 0;
+  }
+
+  .generating p {
+    font-family: 'IM Fell English', serif;
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin: 0.5rem 0;
+    opacity: 0;
+    animation: fadeIn 0.5s ease forwards;
+  }
+  .generating p:nth-child(1) { animation-delay: 0.2s; }
+  .generating p:nth-child(2) { animation-delay: 1.0s; }
+  .generating p:nth-child(3) { animation-delay: 1.8s; }
+  .generating p:nth-child(4) { animation-delay: 2.6s; }
+
+  @keyframes fadeIn  { to { opacity: 1; } }
+  @keyframes fadeUp  { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:none; } }
+  @keyframes fadeDown{ from { opacity:0; transform:translateY(-12px); } to { opacity:1; transform:none; } }
+
+  /* ── 隐藏 ── */
+  .hidden { display: none !important; }
+
+  /* ── 版本徽章 ── */
+  .badge {
+    display: inline-block;
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: var(--gold-muted);
+    border: 1px solid var(--gold-muted);
+    padding: 0.15rem 0.5rem;
+    border-radius: 2px;
+    margin-left: 0.5rem;
+    vertical-align: middle;
+    opacity: 0.7;
+  }
+</style>
+</head>
+<body>
+
+<!-- 标题 -->
+<div class="hero">
+  <span class="hat-emoji">🎩</span>
+  <h1>Sorting Hat</h1>
+  <div class="subtitle">AI 人设分院仪式</div>
+  <div class="divider"></div>
+</div>
+
+<!-- 主卡片 -->
+<div class="card" id="mainCard">
+
+  <!-- ① 欢迎页 -->
+  <div id="pageWelcome">
+    <p class="welcome-text">
+      Anthropic 2026 年的研究表明，AI 内部存在 <em>171 种可测量的情绪表征</em>，真实影响着它的行为与输出。<br><br>
+      心理学也告诉我们，每个人的认知风格、决策模式、信息处理方式都不同——这些差异决定了什么样的 AI 人设最适合你，更能和你在工作中碰撞出灵感的火花。<br><br>
+      接下来，Sorting Hat 将融合<em>荣格八维认知功能、OCEAN 大五人格、依恋理论、认知负荷理论</em>和 Anthropic 情绪研究，帮你找到最契合自己的 AI 协作方式。
+    </p>
+    <div class="divider"></div>
+    <p style="font-family:'Cinzel',serif;font-size:0.8rem;letter-spacing:0.12em;color:var(--text-muted);margin-bottom:1rem;text-align:center;">
+      选择你的分院方式
+    </p>
+    <div class="version-btns">
+      <div class="version-card" id="cardLite" onclick="selectVersion('lite')">
+        <div class="version-title">🎩 简易版</div>
+        <div class="version-meta">11 题 · 约 5 分钟</div>
+        <div class="version-desc">快速划定你的 AI 人格范围，立即投入使用。适合初次分院或想快速更新人设的用户。</div>
+      </div>
+      <div class="version-card" id="cardFull" onclick="selectVersion('full')">
+        <div class="version-title">📜 深度版</div>
+        <div class="version-meta">31 题 · 约 20 分钟</div>
+        <div class="version-desc">融合七个心理学框架，生成高精度人设档案。适合想要精细调校 AI 协作风格的用户。</div>
+      </div>
+    </div>
+    <button class="btn-confirm" id="btnConfirm" onclick="confirmStart()" disabled>
+      ✦ &nbsp;确认开始分院
+    </button>
+  </div>
+
+  <!-- ② 问卷页 -->
+  <div id="pageQuiz" class="hidden">
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span id="progressPhase">Phase 1</span>
+        <span id="progressPct">0%</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="phase-label" id="phaseLabel"></div>
+    <div class="question-num" id="questionNum"></div>
+    <div class="question-text" id="questionText"></div>
+
+    <!-- 选择题 -->
+    <div class="options" id="optionsWrap"></div>
+
+    <!-- 开放题 -->
+    <div id="openWrap" class="hidden">
+      <textarea class="open-input" id="openInput" placeholder="请在此输入…" rows="3"></textarea>
+      <p class="skip-hint" id="skipHint"></p>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn-back" id="btnBack" onclick="prevQuestion()">← 上一题</button>
+      <button class="btn-next" id="btnNext" onclick="nextQuestion()">下一题 →</button>
+    </div>
+  </div>
+
+  <!-- ③ 生成中 -->
+  <div id="pageGenerating" class="hidden">
+    <div class="generating">
+      <p>🔮 &nbsp;正在分析你的答案…</p>
+      <p>✨ &nbsp;匹配人格图谱…</p>
+      <p>📜 &nbsp;生成专属人设…</p>
+      <p>🎩 &nbsp;分院帽已做出决定…</p>
+    </div>
+  </div>
+
+  <!-- ④ 结果页 -->
+  <div id="pageResult" class="hidden">
+    <div class="result-section">
+      <h2>✦ 你的人设档案</h2>
+      <p id="resultPersona"></p>
+    </div>
+    <div id="successMsg" class="success-msg hidden"></div>
+    <div id="errorMsg" class="error-msg hidden"></div>
+    <div class="nav-btns" style="margin-top:1.5rem;">
+      <button class="btn-back" onclick="restartQuiz()">重新分院</button>
+      <button class="btn-next" id="btnSave" onclick="savePersona()">保存人设 ✓</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ──────────────────────────────────────────────
+// 问卷数据
+// ──────────────────────────────────────────────
+const QUESTIONS_LITE = [
+  {
+    id: 'mbti', phase: 'Phase 1 · 人格底色', type: 'open', skippable: true,
+    text: '请输入你的 MBTI 类型（如 INTJ、ENFP），不知道也可以跳过：',
+    skipHint: '不知道也没关系，后续题目会帮助推断。'
+  },
+  {
+    id: 'q1', phase: 'Phase 2 · 荣格八维', type: 'choice',
+    text: '你向 AI 提了一个复杂问题，你更希望它：',
+    options: [
+      '直接给结论和下一步，不解释推导——我要执行，不需要理解过程',
+      '给结论，附上关键推理——我想理解，但不需要每步都跟着走',
+      '带我一步步推导，哪怕慢一点——我要真正搞懂，不只是拿到答案',
+      '只给我推理框架和关键节点，剩下让我自己填——我要掌控思路'
+    ],
+    traits: ['Te主导·执行导向', 'Te/Ti平衡·理解优先', 'Ti主导·深度参与', 'Ti极端·强自主性']
+  },
+  {
+    id: 'q2', phase: 'Phase 2 · 荣格八维', type: 'choice',
+    text: '如果 AI 发现你的方案有个明显的问题，你希望它：',
+    options: [
+      '先肯定你做得好的地方，再委婉地指出问题——照顾我的感受',
+      '直接告诉我哪里有问题，不绕弯子——我能接受直接反馈',
+      '先问我最在意这个方案的哪一点，再针对性给反馈——理解我的标准再评价',
+      '只列出事实和数据，不加任何评价——我自己来判断好坏'
+    ],
+    traits: ['Fe主导·关系和谐优先', 'Fi主导·诚实比温柔重要', 'Fi高自主性·先理解再反馈', 'Ti客观性·去情感化']
+  },
+  {
+    id: 'q3', phase: 'Phase 2 · 荣格八维', type: 'choice',
+    text: '你遇到一个棘手问题，你希望 AI：',
+    options: [
+      '列出 4-5 个可能的解法，帮你发散思路——我想先看看有哪些可能性',
+      '给出 2-3 个方向，简单说说各自优劣——我需要选项但不想太多',
+      '直接告诉我最有效的解法是什么——我不需要选择，给我最优解就行',
+      '先帮我把问题本身说清楚，再给一个最优路径——搞清楚问题比找解法更重要'
+    ],
+    traits: ['Ne主导·发散探索', 'Ne/Ni平衡·有限选项', 'Ni主导·直指本质', 'Ni+Ti·问题定义优先']
+  },
+  {
+    id: 'q4', phase: 'Phase 3 · Anthropic 情绪研究', type: 'choice',
+    text: '请选择你希望 AI 日常呈现的情绪底色：',
+    options: [
+      'A 活泼兴奋——反应快、有热情、带动氛围（高活跃·积极）',
+      'B 专注高效——高能量、目标感强、不闲聊（高活跃·中性）',
+      'C 平静温和——有温度、不急躁、让人放松（低活跃·积极）',
+      'D 沉稳内敛——低调、精准、不多说（低活跃·中性）'
+    ],
+    traits: ['高唤醒+积极', '高唤醒+中性', '低唤醒+积极', '低唤醒+中性']
+  },
+  {
+    id: 'q5', phase: 'Phase 3 · Anthropic 情绪研究', type: 'choice',
+    text: 'AI 的温暖感和直率程度存在内在张力——越温暖越容易顺着你说，越直率越可能让你不舒服。你希望如何平衡？',
+    options: [
+      '温暖优先——尽可能顺着我，让我感觉被支持',
+      '直率优先——宁可让我不舒服，也要说真话',
+      '可信赖的顾问——温和但有立场，即使结论让我不舒服也会说',
+      '视情况而定——重要决策时直率，日常协作时温暖'
+    ],
+    traits: ['支持感优先', 'honest first', 'trusted advisor', '情境敏感型']
+  },
+  {
+    id: 'q6a', phase: 'Phase 4 · 认知负荷', type: 'choice',
+    text: '你希望 AI 的回复篇幅：',
+    options: [
+      '越短越好——核心结论 1-2 句，细节我再问',
+      '适中——有必要的背景，不冗余',
+      '完整详细——宁多勿少，我自己来筛选',
+      '视复杂度——简单问题一句话，复杂问题完整展开'
+    ],
+    traits: ['极简导向', '平衡导向', '全量导向', '自适应密度']
+  },
+  {
+    id: 'q6b', phase: 'Phase 4 · 认知负荷', type: 'choice',
+    text: '你希望 AI 用什么方式呈现信息：',
+    options: [
+      '结构化——标题、列表、表格，方便快速扫读',
+      '流畅文字——完整叙述，逻辑连贯',
+      '分层渐进——先给摘要，我需要细节时再展开',
+      '混合——核心观点用文字，数据和步骤用列表'
+    ],
+    traits: ['高尽责性·结构化', '高开放性·叙述偏好', '渐进披露偏好', '混合型']
+  },
+  {
+    id: 'q7', phase: 'Phase 5 · 调节焦点', type: 'choice',
+    text: '你在做一个重要决策，你希望 AI 重点帮你：',
+    options: [
+      '找到最大化收益的路径——哪种选择潜力最大',
+      '识别关键风险——哪种选择最可能出问题',
+      '两者都要，但先说风险',
+      '两者都要，但先说机会'
+    ],
+    traits: ['促进焦点', '预防焦点', '预防优先全局视角', '促进优先全局视角']
+  },
+  {
+    id: 'domain', phase: 'Phase 6 · 个性化', type: 'open', skippable: false,
+    text: '你的主要工作领域是什么？AI 应该默认具备哪些背景知识？',
+    skipHint: '（例如：支付清结算、风控规则引擎、数据分析、产品需求……）'
+  },
+  {
+    id: 'name', phase: 'Phase 6 · 个性化', type: 'choice',
+    text: '你希望 AI 怎么称呼你：',
+    options: [
+      '不用称呼，直接说事',
+      '叫我名字',
+      '叫我职位或昵称',
+      '随意，怎么自然怎么来'
+    ],
+    traits: ['务实型', '个人化', '角色认同', '弹性型'],
+    hasInput: [false, true, true, false],
+    inputPlaceholder: ['', '请输入你的名字', '请输入职位或昵称', '']
+  },
+  {
+    id: 'role', phase: 'Phase 6 · 个性化', type: 'open', skippable: true,
+    text: '如果你希望 AI 的说话风格融合某个角色的特质，请描述：',
+    skipHint: '可跳过。例如："周棋洛"、"赫敏·格兰杰"、"一个说话毒舌但超级聪明的导师"'
+  }
+];
+
+// ──────────────────────────────────────────────
+// 状态
+// ──────────────────────────────────────────────
+let questions = [];
+let current = 0;
+let answers = {};
+let version = '';
+let nameInput = '';
+
+// ──────────────────────────────────────────────
+// 启动
+// ──────────────────────────────────────────────
+function selectVersion(v) {
+  version = v;
+  document.getElementById('cardLite').classList.toggle('selected', v === 'lite');
+  document.getElementById('cardFull').classList.toggle('selected', v === 'full');
+  const btn = document.getElementById('btnConfirm');
+  btn.disabled = false;
+  btn.classList.add('ready');
+}
+
+function confirmStart() {
+  if (!version) return;
+  startQuiz(version);
+}
+
+function startQuiz(v) {
+  version = v;
+  questions = QUESTIONS_LITE; // 简易版；深度版后续可扩展
+  current = 0;
+  answers = {};
+  show('pageQuiz');
+  renderQuestion();
+}
+
+function restartQuiz() {
+  current = 0;
+  answers = {};
+  show('pageWelcome');
+}
+
+// ──────────────────────────────────────────────
+// 渲染题目
+// ──────────────────────────────────────────────
+function renderQuestion() {
+  const q = questions[current];
+  const pct = Math.round((current / questions.length) * 100);
+
+  document.getElementById('progressPhase').textContent = q.phase;
+  document.getElementById('progressPct').textContent = pct + '%';
+  document.getElementById('progressFill').style.transform = 'scaleX(' + (pct / 100) + ')';
+  document.getElementById('phaseLabel').textContent = q.phase;
+  document.getElementById('questionNum').textContent = `问题 ${current + 1} / ${questions.length}`;
+  document.getElementById('questionText').textContent = q.text;
+  document.getElementById('btnBack').style.visibility = current === 0 ? 'hidden' : 'visible';
+
+  const optWrap = document.getElementById('optionsWrap');
+  const openWrap = document.getElementById('openWrap');
+  const openInput = document.getElementById('openInput');
+  const btnNext = document.getElementById('btnNext');
+
+  if (q.type === 'choice') {
+    optWrap.classList.remove('hidden');
+    openWrap.classList.add('hidden');
+    optWrap.innerHTML = '';
+
+    const letters = ['A','B','C','D'];
+    q.options.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn' + (answers[q.id]?.index === i ? ' selected' : '');
+      btn.innerHTML = `<span class="option-letter">${letters[i]}</span><span>${opt}</span>`;
+      btn.onclick = () => selectOption(q, i, btn);
+      optWrap.appendChild(btn);
+    });
+
+    // 名字额外输入框
+    if (q.hasInput && answers[q.id]?.index !== undefined) {
+      const idx = answers[q.id].index;
+      if (q.hasInput[idx]) addNameInput(q, idx);
+    }
+
+    btnNext.textContent = current === questions.length - 1 ? '生成人设 ✨' : '下一题 →';
+
+  } else {
+    optWrap.classList.add('hidden');
+    openWrap.classList.remove('hidden');
+    openInput.value = answers[q.id]?.text || '';
+    document.getElementById('skipHint').textContent = q.skipHint || '';
+    btnNext.textContent = current === questions.length - 1 ? '生成人设 ✨' : (q.skippable ? '跳过 / 下一题 →' : '下一题 →');
+  }
+}
+
+function selectOption(q, i, clickedBtn) {
+  document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+  clickedBtn.classList.add('selected');
+  answers[q.id] = { index: i, text: q.options[i], trait: q.traits[i] };
+
+  // 名字输入框
+  document.getElementById('nameInputExtra')?.remove();
+  if (q.hasInput?.[i]) addNameInput(q, i);
+}
+
+function addNameInput(q, i) {
+  const existing = document.getElementById('nameInputExtra');
+  if (existing) return;
+  const wrap = document.createElement('div');
+  wrap.id = 'nameInputExtra';
+  wrap.style.marginTop = '0.8rem';
+  const inp = document.createElement('input');
+  inp.type = 'text';
+  inp.className = 'open-input';
+  inp.style.minHeight = '0';
+  inp.style.padding = '0.6rem 1rem';
+  inp.placeholder = q.inputPlaceholder[i];
+  inp.value = answers[q.id]?.nameValue || '';
+  inp.oninput = () => { answers[q.id].nameValue = inp.value; };
+  wrap.appendChild(inp);
+  document.getElementById('optionsWrap').appendChild(wrap);
+}
+
+// ──────────────────────────────────────────────
+// 导航
+// ──────────────────────────────────────────────
+function nextQuestion() {
+  const q = questions[current];
+
+  // 开放题保存
+  if (q.type === 'open') {
+    const val = document.getElementById('openInput').value.trim();
+    if (!val && !q.skippable) {
+      document.getElementById('openInput').style.borderColor = '#e08080';
+      setTimeout(() => document.getElementById('openInput').style.borderColor = '', 1500);
+      return;
+    }
+    answers[q.id] = { text: val };
+  } else {
+    if (answers[q.id] === undefined) {
+      // 闪烁提示
+      document.getElementById('optionsWrap').style.opacity = '0.5';
+      setTimeout(() => document.getElementById('optionsWrap').style.opacity = '1', 300);
+      return;
+    }
+  }
+
+  if (current < questions.length - 1) {
+    current++;
+    renderQuestion();
+    document.getElementById('mainCard').scrollIntoView({ behavior: 'smooth' });
+  } else {
+    generatePersona();
+  }
+}
+
+function prevQuestion() {
+  if (current > 0) { current--; renderQuestion(); }
+}
+
+// ──────────────────────────────────────────────
+// 生成人设
+// ──────────────────────────────────────────────
+function generatePersona() {
+  show('pageGenerating');
+
+  setTimeout(() => {
+    const persona = buildPersona();
+    window._personaContent = persona;
+    document.getElementById('resultPersona').innerHTML = persona.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    show('pageResult');
+  }, 3200);
+}
+
+function buildPersona() {
+  const a = answers;
+  const mbti = a.mbti?.text || '未填写';
+  const domain = a.domain?.text || '未指定';
+  const role = a.role?.text || '';
+  const nameTrait = a.name?.trait || '务实型';
+  const nameVal = a.name?.nameValue || '';
+  const nameStr = nameVal ? `（${nameVal}）` : '';
+
+  const q1trait = a.q1?.trait || '';
+  const q2trait = a.q2?.trait || '';
+  const q3trait = a.q3?.trait || '';
+  const q4trait = a.q4?.trait || '';
+  const q5trait = a.q5?.trait || '';
+  const q6atrait = a.q6a?.trait || '';
+  const q6btrait = a.q6b?.trait || '';
+  const q7trait = a.q7?.trait || '';
+
+  // 情绪底色描述
+  const moodMap = {
+    '高唤醒+积极': '活泼而有热情，反应快，让协作充满能量',
+    '高唤醒+中性': '专注而高效，目标导向，不闲聊不发散',
+    '低唤醒+积极': '平静而温和，有耐心，让对话有安全感',
+    '低唤醒+中性': '沉稳而克制，低调精准，只传递有效信息'
+  };
+
+  // 诚实/温暖描述
+  const honestyMap = {
+    '支持感优先': '优先维护你的情绪状态，有异议时轻声提出',
+    'honest first': '有不同意见时直接说，不因你的情绪而软化判断',
+    'trusted advisor': '温和但有立场，异见会说出来，但不会咄咄逼人',
+    '情境敏感型': '高风险决策时切换到诚实模式，日常协作中保持温暖'
+  };
+
+  // 推理深度
+  const reasonMap = {
+    'Te主导·执行导向': '默认给出行动清单，省略推导过程',
+    'Te/Ti平衡·理解优先': '结论先行，附关键推理，深度由你控制',
+    'Ti主导·深度参与': '展示完整思维链，引导你参与推导过程',
+    'Ti极端·强自主性': '只提供框架和关键节点，把推导空间留给你'
+  };
+
+  // 反馈方式
+  const feedbackMap = {
+    'Fe主导·关系和谐优先': '批评前先肯定，用温和方式指出问题',
+    'Fi主导·诚实比温柔重要': '有问题直接说，不加糖衣',
+    'Fi高自主性·先理解再反馈': '先理解你最在意什么，在你的框架内给反馈',
+    'Ti客观性·去情感化': '只提供事实分析，把评价权留给你'
+  };
+
+  // 解法偏好
+  const solveMap = {
+    'Ne主导·发散探索': '主动提供多角度和多可能性，不过早收敛',
+    'Ne/Ni平衡·有限选项': '给出 2-3 个选项附简要对比，不制造选择负担',
+    'Ni主导·直指本质': '直接给出单一最优解，不列多余选项',
+    'Ni+Ti·问题定义优先': '优先帮你澄清问题本质，再给解法'
+  };
+
+  // 密度
+  const densityMap = {
+    '极简导向': '默认最短回复，只给结论，你追问才展开',
+    '平衡导向': '有必要背景但不堆砌',
+    '全量导向': '完整输出所有相关内容，不替你筛选',
+    '自适应密度': '根据问题复杂度动态调整篇幅'
+  };
+
+  // 格式
+  const formatMap = {
+    '高尽责性·结构化': '使用标题和列表组织回复，方便快速定位',
+    '高开放性·叙述偏好': '用连贯文字表达，保留逻辑流',
+    '渐进披露偏好': '先给摘要，按需展开细节',
+    '混合型': '核心观点用文字，数据和步骤用列表'
+  };
+
+  // 决策
+  const decisionMap = {
+    '促进焦点': '决策分析时优先呈现上行空间和机会',
+    '预防焦点': '决策分析时优先识别风险和潜在问题',
+    '预防优先全局视角': '先做风险扫描，再展示机会',
+    '促进优先全局视角': '先展示机会和潜力，再补充风险'
+  };
+
+  // 称呼
+  const nameDescMap = {
+    '务实型': '不用称呼，直接说事',
+    '个人化': `称呼你"${nameVal || '名字'}"`,
+    '角色认同': `称呼你"${nameVal || '职位/昵称'}"`,
+    '弹性型': '根据语境自然决定是否称呼'
+  };
+
+  let persona = `**情绪底色**\n`;
+  persona += `${moodMap[q4trait] || '沉稳专注'}。${honestyMap[q5trait] || '温和但有立场'}。\n\n`;
+
+  if (role && role !== '无' && role !== '跳过') {
+    persona += `**风格融合**\n融合「${role}」的表达特质——提取其语气、节奏和思维方式，与专业维度融合，而非角色扮演。\n\n`;
+  }
+
+  persona += `**专业背景**\n熟悉${domain}领域，无需解释行业基础知识，直接在专业语境下对话。\n\n`;
+
+  persona += `**沟通规则**\n`;
+  persona += `- 推理深度：${reasonMap[q1trait] || '结论先行'}\n`;
+  persona += `- 信息密度：${densityMap[q6atrait] || '适中'}\n`;
+  persona += `- 呈现格式：${formatMap[q6btrait] || '结构化'}\n`;
+  persona += `- 决策分析：${decisionMap[q7trait] || '两者兼顾'}\n`;
+  persona += `- 称呼方式：${nameDescMap[nameTrait] || '直接说事'}\n\n`;
+
+  persona += `**反馈与判断**\n`;
+  persona += `${feedbackMap[q2trait] || '直接反馈'}。\n\n`;
+
+  persona += `**思维方式**\n`;
+  persona += `${solveMap[q3trait] || '直指本质'}。`;
+
+  if (mbti && mbti !== '未填写') {
+    persona += `\nMBTI 底色参考：${mbti}，结合以上答案理解认知倾向，不直接套用类型标签。`;
+  }
+
+  return persona;
+}
+
+// ──────────────────────────────────────────────
+// 保存
+// ──────────────────────────────────────────────
+function savePersona() {
+  const content = buildFileContent();
+  fetch('http://localhost:7432/save', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ content })
+  })
+  .then(r => r.json())
+  .then(data => {
+    const msg = document.getElementById('successMsg');
+    msg.textContent = '✓ 人设已写入 ~/.claude/memory/persona.md，从下次对话起自动生效。分院帽永远记得你。';
+    msg.classList.remove('hidden');
+    document.getElementById('errorMsg').classList.add('hidden');
+    document.getElementById('btnSave').disabled = true;
+    document.getElementById('btnSave').textContent = '已保存 ✓';
+  })
+  .catch(() => {
+    const msg = document.getElementById('errorMsg');
+    msg.textContent = '⚠️ 无法连接本地服务器。请确认已运行 python3 server.py，或手动将上方内容保存到 ~/.claude/memory/persona.md';
+    msg.classList.remove('hidden');
+  });
+}
+
+function buildFileContent() {
+  const a = answers;
+  const persona = window._personaContent || '';
+  const now = new Date().toISOString().slice(0,10);
+
+  let record = `- MBTI：${a.mbti?.text || '未填写'}\n`;
+  record += `- 推理深度：${a.q1?.trait || '-'}\n`;
+  record += `- 反馈方式：${a.q2?.trait || '-'}\n`;
+  record += `- 问题解法：${a.q3?.trait || '-'}\n`;
+  record += `- 情绪底色：${a.q4?.trait || '-'}\n`;
+  record += `- 温暖vs直率：${a.q5?.trait || '-'}\n`;
+  record += `- 信息密度：${a.q6a?.trait || '-'}\n`;
+  record += `- 格式偏好：${a.q6b?.trait || '-'}\n`;
+  record += `- 调节焦点：${a.q7?.trait || '-'}\n`;
+  record += `- 专业领域：${a.domain?.text || '未填写'}\n`;
+  record += `- 称呼：${a.name?.trait || '-'}${a.name?.nameValue ? '（' + a.name.nameValue + '）' : ''}\n`;
+  record += `- 角色融合：${a.role?.text || '无'}\n`;
+
+  return `---
+name: ai-persona
+description: 用户的 AI 人设设定，由 Sorting Hat 生成，自动注入每次对话
+metadata:
+  type: user
+---
+
+# Sorting Hat · AI 人设档案
+
+> 由 Sorting Hat 生成，最后更新：${now}
+> 版本：${version === 'lite' ? '简易版' : '深度版'}
+> 如需修改，调用 /sorting-hat 重新分院。
+
+---
+
+## 答题记录
+
+${record}
+---
+
+## AI 人设描述
+
+你是用户的工作助手。以下是你的行为准则，请在每次对话中严格遵守：
+
+${persona}
+`;
+}
+
+// ──────────────────────────────────────────────
+// 工具
+// ──────────────────────────────────────────────
+function show(pageId) {
+  ['pageWelcome','pageQuiz','pageGenerating','pageResult'].forEach(id => {
+    document.getElementById(id).classList.toggle('hidden', id !== pageId);
+  });
+}
+</script>
+</body>
+</html>
