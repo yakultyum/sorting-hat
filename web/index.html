@@ -646,8 +646,12 @@
   <!-- ④ 结果页 -->
   <div id="pageResult" class="hidden">
     <div class="result-section">
-      <h2>✦ 你的人设档案</h2>
+      <h2 style="display:flex;justify-content:space-between;align-items:center;">
+        <span>✦ 你的人设档案</span>
+        <button id="btnEdit" onclick="toggleEditPersona()" style="font-family:'Cinzel',serif;font-size:0.68rem;letter-spacing:0.12em;background:transparent;border:1px solid var(--border-gold);color:var(--text-muted);padding:0.3rem 0.8rem;border-radius:2px;cursor:pointer;transition:all 0.25s ease;" onmouseover="this.style.borderColor='var(--gold-primary)';this.style.color='var(--text-secondary)'" onmouseout="this.style.borderColor='var(--border-gold)';this.style.color='var(--text-muted)'">编辑</button>
+      </h2>
       <p id="resultPersona"></p>
+      <textarea id="personaEditor" class="open-input hidden" style="min-height:260px;margin-top:0.5rem;" spellcheck="false"></textarea>
     </div>
     <div id="successMsg" class="success-msg hidden"></div>
     <div id="errorMsg" class="error-msg hidden"></div>
@@ -1142,6 +1146,33 @@ ${record}
 
 ${persona}
 `;
+}
+
+// ──────────────────────────────────────────────
+// 编辑人设
+// ──────────────────────────────────────────────
+function toggleEditPersona() {
+  const display = document.getElementById('resultPersona');
+  const editor  = document.getElementById('personaEditor');
+  const btn     = document.getElementById('btnEdit');
+  const isEditing = !editor.classList.contains('hidden');
+
+  if (isEditing) {
+    // 完成编辑：把 textarea 内容同步回显示区和 _personaContent
+    const edited = editor.value;
+    window._personaContent = edited;
+    display.innerHTML = edited.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    editor.classList.add('hidden');
+    display.classList.remove('hidden');
+    btn.textContent = '编辑';
+  } else {
+    // 进入编辑：把当前内容放进 textarea
+    editor.value = window._personaContent || '';
+    display.classList.add('hidden');
+    editor.classList.remove('hidden');
+    editor.focus();
+    btn.textContent = '完成';
+  }
 }
 
 // ──────────────────────────────────────────────
