@@ -274,13 +274,11 @@
   }
 
   /* ── 进度条 ── */
-  .progress-wrap {
-    margin-bottom: 1.8rem;
-  }
+  .progress-wrap { margin-bottom: 1.8rem; }
 
   .progress-label {
     font-family: 'Cinzel', serif;
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     letter-spacing: 0.15em;
     color: var(--text-muted);
     display: flex;
@@ -289,8 +287,8 @@
   }
 
   .progress-bar-bg {
-    height: 4px;
-    background: rgba(255,255,255,0.06);
+    height: 3px;
+    background: rgba(255, 255, 255, 0.06);
     border-radius: 2px;
     overflow: hidden;
   }
@@ -299,19 +297,17 @@
     height: 100%;
     background: linear-gradient(to right, var(--gold-muted), var(--gold-bright));
     border-radius: 2px;
-    width: 100%;
-    transform-origin: left;
-    transform: scaleX(0);
-    transition: transform 0.5s ease;
+    width: 0%;
+    transition: width 0.5s ease;
     box-shadow: 0 0 8px var(--glow-gold);
   }
 
   /* ── 题目 ── */
   .phase-label {
     font-family: 'Cinzel', serif;
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     letter-spacing: 0.25em;
-    color: var(--gold-muted);
+    color: var(--purple);
     text-transform: uppercase;
     margin-bottom: 0.4rem;
   }
@@ -325,9 +321,9 @@
   }
 
   .question-text {
-    font-family: 'IM Fell English', serif;
+    font-family: 'Noto Serif SC', serif;
     font-size: 1.15rem;
-    line-height: 1.7;
+    line-height: 1.8;
     color: var(--text-primary);
     margin-bottom: 1.5rem;
   }
@@ -336,12 +332,12 @@
   .options { display: flex; flex-direction: column; gap: 0.65rem; }
 
   .option-btn {
-    background: rgba(201,168,76,0.05);
-    border: 1px solid rgba(201,168,76,0.25);
+    background: rgba(201, 168, 76, 0.03);
+    border: 1px solid var(--border-dim);
     color: var(--text-secondary);
-    font-family: 'IM Fell English', serif;
+    font-family: 'Noto Serif SC', serif;
     font-size: 1rem;
-    line-height: 1.6;
+    line-height: 1.65;
     padding: 0.85rem 1.1rem;
     cursor: pointer;
     border-radius: 2px;
@@ -353,25 +349,26 @@
   }
 
   .option-btn:hover {
-    background: rgba(201,168,76,0.13);
+    background: rgba(201, 168, 76, 0.10);
     border-color: var(--gold-primary);
     color: var(--text-primary);
-    box-shadow: 0 0 10px rgba(201,168,76,0.2);
+    box-shadow: 0 0 10px rgba(201, 168, 76, 0.15);
   }
 
   .option-btn.selected {
-    background: rgba(201,168,76,0.18);
+    background: rgba(201, 168, 76, 0.18);
     border-color: var(--gold-bright);
     color: var(--gold-bright);
-    box-shadow: 0 0 14px rgba(201,168,76,0.35);
+    box-shadow: 0 0 16px rgba(201, 168, 76, 0.30);
   }
 
   .option-letter {
     font-family: 'Cinzel', serif;
-    font-size: 0.8rem;
-    color: var(--gold-muted);
-    min-width: 1.2rem;
-    padding-top: 0.1rem;
+    font-size: 0.78rem;
+    color: var(--teal);
+    min-width: 1.4rem;
+    padding-top: 0.15rem;
+    flex-shrink: 0;
   }
 
   .option-btn.selected .option-letter { color: var(--gold-bright); }
@@ -379,27 +376,27 @@
   /* ── 开放题输入框 ── */
   .open-input {
     width: 100%;
-    background: rgba(255,255,255,0.04);
+    background: rgba(255, 255, 255, 0.03);
     border: 1px solid var(--border-gold);
     border-radius: 2px;
     color: var(--text-primary);
-    font-family: 'IM Fell English', serif;
+    font-family: 'Noto Serif SC', serif;
     font-size: 1rem;
     padding: 0.85rem 1rem;
     outline: none;
     transition: all 0.3s ease;
     resize: vertical;
-    min-height: 70px;
+    min-height: 72px;
   }
 
   .open-input:focus {
     border-color: var(--gold-primary);
-    box-shadow: 0 0 10px rgba(201,168,76,0.2);
+    box-shadow: 0 0 12px rgba(201, 168, 76, 0.18);
   }
 
   .skip-hint {
-    font-family: 'IM Fell English', serif;
-    font-size: 0.85rem;
+    font-family: 'Noto Serif SC', serif;
+    font-size: 0.83rem;
     font-style: italic;
     color: var(--text-muted);
     margin-top: 0.5rem;
@@ -414,7 +411,7 @@
   }
 
   .btn-next {
-    background: rgba(201,168,76,0.12);
+    background: rgba(201, 168, 76, 0.12);
     border: 1px solid var(--gold-primary);
     color: var(--gold-bright);
     font-family: 'Cinzel', serif;
@@ -427,13 +424,14 @@
   }
 
   .btn-next:hover {
-    background: rgba(201,168,76,0.25);
-    box-shadow: 0 0 14px var(--glow-gold);
+    background: rgba(201, 168, 76, 0.24);
+    box-shadow: 0 0 18px var(--glow-gold);
+    text-shadow: 0 0 8px var(--gold-primary);
   }
 
   .btn-back {
     background: transparent;
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1px solid rgba(255, 255, 255, 0.10);
     color: var(--text-muted);
     font-family: 'Cinzel', serif;
     font-size: 0.85rem;
@@ -444,7 +442,10 @@
     transition: all 0.25s ease;
   }
 
-  .btn-back:hover { color: var(--text-secondary); border-color: var(--border-gold); }
+  .btn-back:hover {
+    color: var(--text-secondary);
+    border-color: var(--border-gold);
+  }
 
   /* ── 结果页 ── */
   .result-section { margin-bottom: 1.5rem; }
@@ -815,7 +816,7 @@ function renderQuestion() {
 
   document.getElementById('progressPhase').textContent = q.phase;
   document.getElementById('progressPct').textContent = pct + '%';
-  document.getElementById('progressFill').style.transform = 'scaleX(' + (pct / 100) + ')';
+  document.getElementById('progressFill').style.width = pct + '%';
   document.getElementById('phaseLabel').textContent = q.phase;
   document.getElementById('questionNum').textContent = `问题 ${current + 1} / ${questions.length}`;
   document.getElementById('questionText').textContent = q.text;
