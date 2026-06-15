@@ -233,12 +233,12 @@
   .btn-primary {
     flex: 1;
     min-width: 160px;
-    background: rgba(201,168,76,0.1);
+    background: rgba(201, 168, 76, 0.12);
     border: 1px solid var(--gold-primary);
     color: var(--gold-bright);
     font-family: 'Cinzel', serif;
-    font-size: 0.9rem;
-    letter-spacing: 0.1em;
+    font-size: 0.88rem;
+    letter-spacing: 0.12em;
     padding: 0.75rem 1.5rem;
     cursor: pointer;
     border-radius: 2px;
@@ -247,30 +247,30 @@
   }
 
   .btn-primary:hover {
-    background: rgba(201,168,76,0.22);
-    box-shadow: 0 0 14px var(--glow-gold);
-    text-shadow: 0 0 8px var(--gold-primary);
+    background: rgba(201, 168, 76, 0.24);
+    box-shadow: 0 0 20px var(--glow-gold);
+    text-shadow: 0 0 10px var(--gold-primary);
   }
 
   .btn-secondary {
     flex: 1;
     min-width: 160px;
     background: transparent;
-    border: 1px solid var(--border-gold);
-    color: var(--text-secondary);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    color: var(--text-muted);
     font-family: 'Cinzel', serif;
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     letter-spacing: 0.1em;
     padding: 0.75rem 1.5rem;
     cursor: pointer;
     border-radius: 2px;
-    transition: all 0.3s ease;
+    transition: all 0.25s ease;
     text-align: center;
   }
 
   .btn-secondary:hover {
-    border-color: var(--gold-muted);
-    color: var(--text-primary);
+    border-color: var(--border-gold);
+    color: var(--text-secondary);
   }
 
   /* ── 进度条 ── */
@@ -452,68 +452,63 @@
 
   .result-section h2 {
     font-family: 'Cinzel', serif;
-    font-size: 0.8rem;
-    letter-spacing: 0.2em;
+    font-size: 0.78rem;
+    letter-spacing: 0.22em;
     color: var(--gold-primary);
     text-transform: uppercase;
-    margin-bottom: 0.7rem;
+    margin-bottom: 0.8rem;
     padding-bottom: 0.4rem;
-    border-bottom: 1px solid rgba(201,168,76,0.2);
+    border-bottom: 1px solid rgba(201, 168, 76, 0.2);
   }
 
   .result-section p {
-    font-family: 'IM Fell English', serif;
-    font-size: 1rem;
-    line-height: 1.8;
+    font-family: 'Noto Serif SC', serif;
+    font-size: 0.98rem;
+    line-height: 1.85;
     color: var(--text-secondary);
   }
 
   .result-section p strong {
     color: var(--text-primary);
-    font-style: normal;
+    font-weight: 600;
   }
 
   .success-msg {
-    background: rgba(201,168,76,0.08);
-    border: 1px solid rgba(201,168,76,0.3);
+    background: rgba(201, 168, 76, 0.08);
+    border: 1px solid rgba(201, 168, 76, 0.3);
     border-radius: 2px;
-    padding: 1rem 1.2rem;
+    padding: 1rem 1.4rem;
     font-family: 'Cinzel', serif;
     font-size: 0.82rem;
     letter-spacing: 0.08em;
     color: var(--gold-primary);
     text-align: center;
     margin-top: 1.5rem;
-    animation: pulse 2s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    0%,100% { box-shadow: 0 0 8px rgba(201,168,76,0.2); }
-    50%      { box-shadow: 0 0 20px rgba(201,168,76,0.4); }
+    animation: pulse-glow 2s ease-in-out infinite;
   }
 
   .error-msg {
-    background: rgba(180,60,60,0.1);
-    border: 1px solid rgba(180,60,60,0.4);
+    background: rgba(180, 60, 60, 0.10);
+    border: 1px solid rgba(180, 60, 60, 0.40);
     border-radius: 2px;
     padding: 0.8rem 1.2rem;
-    font-family: 'IM Fell English', serif;
-    font-size: 0.95rem;
-    color: #e08080;
+    font-family: 'Noto Serif SC', serif;
+    font-size: 0.93rem;
+    color: var(--red-soft);
     margin-top: 1rem;
   }
 
   /* ── 加载动画 ── */
   .generating {
     text-align: center;
-    padding: 2rem 0;
+    padding: 3rem 0;
   }
 
   .generating p {
-    font-family: 'IM Fell English', serif;
+    font-family: 'Noto Serif SC', serif;
     font-size: 1rem;
     color: var(--text-secondary);
-    margin: 0.5rem 0;
+    margin: 0.6rem 0;
     opacity: 0;
     animation: fadeIn 0.5s ease forwards;
   }
@@ -523,8 +518,21 @@
   .generating p:nth-child(4) { animation-delay: 2.6s; }
 
   @keyframes fadeIn  { to { opacity: 1; } }
-  @keyframes fadeUp  { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:none; } }
-  @keyframes fadeDown{ from { opacity:0; transform:translateY(-12px); } to { opacity:1; transform:none; } }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 8px rgba(201, 168, 76, 0.15); }
+    50%       { box-shadow: 0 0 24px rgba(201, 168, 76, 0.40); }
+  }
 
   /* ── 隐藏 ── */
   .hidden { display: none !important; }
@@ -533,15 +541,23 @@
   .badge {
     display: inline-block;
     font-family: 'Cinzel', serif;
-    font-size: 0.65rem;
+    font-size: 0.62rem;
     letter-spacing: 0.15em;
     color: var(--gold-muted);
     border: 1px solid var(--gold-muted);
-    padding: 0.15rem 0.5rem;
+    padding: 0.12rem 0.45rem;
     border-radius: 2px;
     margin-left: 0.5rem;
     vertical-align: middle;
-    opacity: 0.7;
+    opacity: 0.65;
+  }
+
+  @media (max-width: 560px) {
+    .card { padding: 1.8rem 1.4rem; }
+    .version-btns { flex-direction: column; }
+    .nav-btns { flex-direction: column-reverse; }
+    .btn-next, .btn-back { width: 100%; text-align: center; }
+    .btn-primary, .btn-secondary { min-width: unset; }
   }
 </style>
 </head>
