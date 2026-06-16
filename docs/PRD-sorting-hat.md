@@ -338,6 +338,76 @@ AI 扫描目录结构作为背景参考
 | 人设写入后用户会感受到协作质量提升 | 使用前后对比用户满意度 | 高 |
 | 三层转化规则生成的人设语言不会让 AI 产生奇怪行为 | 种子用户实际对话测试 | 中 |
 
+### 7.4 使用方法
+
+#### 安装
+
+**第一步：克隆项目**
+
+```bash
+git clone https://github.com/yakultyum/sorting-hat.git
+```
+
+**第二步：复制 skill 文件**
+
+```bash
+mkdir -p ~/.claude/skills/sorting-hat
+cp sorting-hat/skill/SKILL.md ~/.claude/skills/sorting-hat/SKILL.md
+```
+
+**系统要求：** Python 3（系统自带）、Claude Code / Cursor / Windsurf 任一
+
+---
+
+#### 人设分院
+
+在任意目录打开 Claude Code（或其他支持的工具），输入：
+
+```
+/sorting-hat
+```
+
+1. 选择版本：**简易版**（11 题，约 5 分钟）或**深度版**（31 题，约 15-20 分钟）
+2. 选择输出目标：Claude Code / Cursor / Windsurf / 通用 system prompt
+3. 浏览器自动打开，在网页上完成问卷
+4. 点击「保存人设」，人设写入目标配置文件，浏览器自动关闭
+5. 下次对话起，AI 自动以该人设工作
+
+如需直接进入深度版：
+
+```
+/sorting-hat full
+```
+
+---
+
+#### 修改人设
+
+再次调用 `/sorting-hat`，skill 检测到已有人设后进入修改流程：
+
+1. 终端展示当前各维度设置摘要
+2. 选择要修改的维度（或全部重来）
+3. 只重新回答该维度的问题
+4. 人设立即更新生效
+
+---
+
+#### 项目初始化
+
+为任意项目生成 CLAUDE.md，让 AI 进入该项目时自动了解上下文：
+
+```
+/sorting-hat init
+```
+
+或指定路径：
+
+```
+/sorting-hat init ~/work/my-project
+```
+
+全程终端对话，约 3-5 分钟，生成内容包括：项目用途、技术栈、常用命令、命名规范、文档格式、注释语言、Gotcha。
+
 ---
 
 ## 8. 发布计划
