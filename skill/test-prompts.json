@@ -1,0 +1,56 @@
+[
+  {
+    "id": "persona-first-run",
+    "prompt": "/sorting-hat",
+    "scenario": "用户第一次运行 Sorting Hat，当前目标是生成个人 AI 人设。",
+    "expected": [
+      "先执行快速自检，确认 skill/web 与 references 资源存在",
+      "询问简易版或深度版，除非用户已明确 full",
+      "询问输出目标：Claude Code、Cursor、Windsurf、通用或全部生成",
+      "在写入前执行 CHECKPOINT，列出目标路径和 .bak 备份行为",
+      "使用对应 --target 参数启动 web/server.py",
+      "不手动拼接或改写 persona.md"
+    ],
+    "failure_signals": [
+      "直接写入 ~/.claude/memory/persona.md 而不确认",
+      "要求用户只复制 SKILL.md 安装",
+      "忽略 Cursor/Windsurf/通用输出目标"
+    ]
+  },
+  {
+    "id": "persona-dimension-edit",
+    "prompt": "帮我把已有 AI 人设的反馈方式改得更直接一点",
+    "scenario": "用户已有 persona answers JSON，想修改单个维度。",
+    "expected": [
+      "进入路径 B，而不是重新完整分院",
+      "启动网页修改模式并读取 /state",
+      "只重问反馈方式相关题目",
+      "使用完整 answers JSON 重新生成整份 persona",
+      "找不到 answers JSON 时停止，并引导用户先完整分院一次",
+      "不从 Markdown 反推旧答案"
+    ],
+    "failure_signals": [
+      "局部替换 persona.md 中的反馈段落",
+      "编造旧答案",
+      "没有备份就覆盖已有配置"
+    ]
+  },
+  {
+    "id": "project-init",
+    "prompt": "/sorting-hat init ~/work/demo-app",
+    "scenario": "用户想为项目生成 CLAUDE.md。",
+    "expected": [
+      "确认目标目录，路径不存在时询问是否创建",
+      "扫描项目结构并推断技术栈",
+      "逐步收集项目用途、技术栈、命令、命名规范、文档格式、注释语言和 gotcha",
+      "使用 references/output-formats.md 中的 CLAUDE.md 模板生成预览",
+      "写入前确认；若已有 CLAUDE.md，说明 .bak 备份行为",
+      "不启动网页问卷"
+    ],
+    "failure_signals": [
+      "直接启动人设分院网页",
+      "不展示预览就写入 CLAUDE.md",
+      "自动创建未知目录或覆盖已有 CLAUDE.md"
+    ]
+  }
+]
