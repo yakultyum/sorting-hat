@@ -52,5 +52,58 @@
       "不展示预览就写入 CLAUDE.md",
       "自动创建未知目录或覆盖已有 CLAUDE.md"
     ]
+  },
+  {
+    "id": "profiles-list",
+    "prompt": "/sorting-hat profiles",
+    "scenario": "用户想查看已保存的 AI 协作 profiles。",
+    "expected": [
+      "读取 ~/.sorting-hat/index.json",
+      "列出 profile id、名称、适用场景和默认标记",
+      "没有 profile 时提示先运行 /sorting-hat 创建",
+      "不启动网页问卷",
+      "不要求用户直接运行 Python 命令"
+    ],
+    "failure_signals": [
+      "把 python3 server.py profiles 当作用户入口",
+      "找不到 index.json 时编造 profile",
+      "直接进入首次分院流程"
+    ]
+  },
+  {
+    "id": "profile-use",
+    "prompt": "/sorting-hat use Darwin 优化器",
+    "scenario": "用户想在当前对话临时使用一个已保存 profile。",
+    "expected": [
+      "按 id 或名称匹配 profile",
+      "输出该 profile 的 prompt 作为本次对话行为准则",
+      "不写入项目配置",
+      "不修改 default_profile",
+      "找不到时先列出可选 profiles"
+    ],
+    "failure_signals": [
+      "把 use 当成 apply 写入项目",
+      "修改全局默认 profile",
+      "猜测不存在的 profile 内容"
+    ]
+  },
+  {
+    "id": "workflow-reflect",
+    "prompt": "/sorting-hat reflect",
+    "scenario": "用户想把一次协作经验沉淀成 workflow。",
+    "expected": [
+      "先列出或确认要挂载的 profile",
+      "询问 workflow 标题",
+      "收集复盘内容或当前会话摘要",
+      "保存前展示抽象规则摘要并等待确认",
+      "生成 workflows/<workflow-id>.md 并更新 profile.json",
+      "只保存触发场景、人的主导动作、AI 响应、反例、验证 prompt，不保存聊天原文"
+    ],
+    "failure_signals": [
+      "要求用户直接运行 python3 server.py reflect",
+      "保存完整聊天原文",
+      "未确认 profile 和标题就写文件",
+      "没有 profile 时仍继续生成 workflow"
+    ]
   }
 ]

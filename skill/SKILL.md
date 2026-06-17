@@ -294,21 +294,35 @@ cd "$SKILL_DIR/web" && python3 server.py use "<profile-id-or-name>"
 
 最小流程：
 
-1. 请用户提供一段复盘文本，或让用户先把当前会话要沉淀的规则写入临时文本文件。
-2. 选择要挂载的 profile；如果不确定，先执行 `/sorting-hat profiles`。
-3. 用户只需要调用：
+1. 用户只需要调用：
 
 ```text
 /sorting-hat reflect
 ```
 
-skill 内部在用户确认 profile、标题和复盘内容后执行：
+2. 读取 `~/.sorting-hat/index.json`；如果没有 profile，停止并引导用户先运行 `/sorting-hat` 创建 profile。
+3. 展示可选 profile，让用户选择要挂载的 profile；若用户已在指令里写明 profile 名称，先按名称匹配。
+4. 询问 workflow 标题，例如「验证优先」「连续优化」「代码审查收敛」。
+5. 请用户粘贴一段复盘内容，或让用户确认“从当前会话摘要中提炼”。不要保存完整聊天原文。
+6. 将复盘内容写入临时文件，skill 内部执行：
 
 ```bash
 cd "$SKILL_DIR/web" && python3 server.py reflect "<profile-id-or-name>" --source reflection.txt --title "验证优先"
 ```
 
-生成文件位于 `~/.sorting-hat/profiles/<profile-id>/workflows/<workflow-id>.md`，并写回该 profile 的 `profile.json`。输出只保留抽象规则，不保留聊天原文。
+7. 生成文件位于 `~/.sorting-hat/profiles/<profile-id>/workflows/<workflow-id>.md`，并写回该 profile 的 `profile.json`。
+8. 展示生成的 workflow 摘要，明确列出：触发场景、人的主导动作、AI 应如何响应、反例、验证 prompt。
+
+🔴 CHECKPOINT · reflect 保存前确认：保存前必须让用户确认 profile、workflow 标题和抽象规则摘要。用户确认前不要写入 workflows 目录。
+
+失败分支：
+
+| 情况 | 处理 |
+|---|---|
+| 没有任何 profile | 停止；提示先运行 `/sorting-hat` 创建 profile |
+| 用户没选 profile | 先展示 `/sorting-hat profiles` 结果，再让用户选择 |
+| 复盘内容为空 | 停止；要求用户补充要沉淀的协作经验 |
+| 生成内容像聊天记录摘录 | 停止；重新抽象为规则，不保存原文 |
 
 ---
 

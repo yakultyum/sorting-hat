@@ -68,6 +68,16 @@ def check_json_files() -> None:
     print("✓ JSON files are valid")
 
 
+def check_test_prompts_cover_commands() -> None:
+    prompts = json.loads((ROOT / "skill/test-prompts.json").read_text(encoding="utf-8"))
+    ids = {item.get("id") for item in prompts}
+    required = {"persona-first-run", "persona-dimension-edit", "project-init", "profiles-list", "profile-use", "workflow-reflect"}
+    missing = sorted(required - ids)
+    if missing:
+        fail("test-prompts.json missing command coverage: " + ", ".join(missing))
+    print("✓ Test prompts cover main command paths")
+
+
 def check_skill_mentions_resources() -> None:
     skill = (ROOT / "skill/SKILL.md").read_text(encoding="utf-8")
     for required in ["references/evaluation.md", "test-prompts.json", "references/output-formats.md", "install-skill.sh"]:
@@ -108,6 +118,7 @@ def main() -> int:
     check_synced_pairs()
     check_python_files()
     check_json_files()
+    check_test_prompts_cover_commands()
     check_skill_mentions_resources()
     check_profile_metadata_mentions()
     check_executable_scripts()
