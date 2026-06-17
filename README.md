@@ -220,32 +220,4 @@ sorting-hat/
 
 ---
 
-## 开发与发布检查
 
-```bash
-python3 -m unittest discover -s tests -p 'test_*.py'
-python3 scripts/check-release.py
-bash -n scripts/install-skill.sh
-```
-
-`check-release.py` 会确认：
-
-- skill 资源完整；
-- `web/` 与 `skill/web/` 同步；
-- Python 文件可编译；
-- JSON 有效；
-- test prompts 覆盖主命令路径；
-- SKILL.md 引用关键资源。
-
----
-
-## 比赛提交文档
-
-- Markdown：`docs/sorting-hat-competition-submit.md`
-- HTML 展示页：`docs/sorting-hat-competition-submit.html`
-
----
-
-## License
-
-MIT
