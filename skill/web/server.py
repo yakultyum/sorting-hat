@@ -217,7 +217,7 @@ def format_use_profile(profile):
 {profile.get('prompt', '')}"""
 
 
-def build_project_md(name, tech_stack, conventions, gotcha, persona_override):
+def build_project_md(name, tech_stack, conventions, gotcha, persona_override, workflows=None):
     parts = [f"# {name}\n\n> 由 Sorting Hat 生成的项目记忆文件。AI 在处理本项目任务前应读取本文件。\n"]
     if tech_stack:
         parts.append(f"## 技术栈\n\n{tech_stack}\n")
@@ -227,6 +227,21 @@ def build_project_md(name, tech_stack, conventions, gotcha, persona_override):
         parts.append(f"## Gotcha\n\n{gotcha}\n")
     if persona_override:
         parts.append(f"## 人设覆盖\n\n{persona_override}\n")
+    if workflows:
+        rules = []
+        for wf in workflows:
+            title   = wf.get("title") or wf.get("id", "规则")
+            trigger = wf.get("trigger", "")
+            ai_resp = wf.get("ai_response", "")
+            anti    = wf.get("anti_example", "")
+            verify  = wf.get("verification_prompt", "")
+            block = f"### {title}\n"
+            if trigger:  block += f"\n**触发场景**：{trigger}\n"
+            if ai_resp:  block += f"\n**AI 应如何响应**：{ai_resp}\n"
+            if anti:     block += f"\n**反例**：{anti}\n"
+            if verify:   block += f"\n**验证 prompt**：{verify}\n"
+            rules.append(block)
+        parts.append("## 协作规则\n\n" + "\n".join(rules))
     return "\n".join(parts)
 
 
@@ -579,7 +594,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
                     content = prompt_text
                     output.path.write_text(content, encoding="utf-8")
                     written.append({"name": output.name, "path": str(output.path)})
-                # 记录 bound_projects
+                # 记录 bound_projects，并把 workflows 写入 project.md
                 if project_dir and target in ("cursor", "windsurf", "generic"):
                     profile_json_path = profile_dir / "profile.json"
                     pdata = json.loads(profile_json_path.read_text(encoding="utf-8"))
@@ -589,6 +604,41 @@ class Handler(http.server.BaseHTTPRequestHandler):
                         bound.append(entry)
                     pdata["bound_projects"] = bound
                     profile_json_path.write_text(json.dumps(pdata, ensure_ascii=False, indent=2), encoding="utf-8")
+
+                    # 把 workflows 同步到 project.md 的「协作规则」段落
+                    workflow_refs = pdata.get("workflows", [])
+                    if workflow_refs:
+                        workflow_details = []
+                        for wref in workflow_refs:
+                            wfile = profile_dir / wref
+                            if wfile.exists():
+                                fields = parse_workflow_fields(wfile.read_text(encoding="utf-8"))
+                                fields["id"] = wfile.stem
+                                workflow_details.append(fields)
+                        if workflow_details:
+                            project_path = Path(project_dir).expanduser()
+                            sh_dir = project_path / ".sorting-hat"
+                            project_file = sh_dir / "project.md"
+                            if project_file.exists():
+                                # 已有 project.md：读取现有字段，只更新协作规则段落
+                                existing = parse_project_fields(project_file.read_text(encoding="utf-8"))
+                                content = build_project_md(
+                                    existing["name"] or project_path.name,
+                                    existing["tech_stack"],
+                                    existing["conventions"],
+                                    existing["gotcha"],
+                                    existing["persona_override"],
+                                    workflows=workflow_details,
+                                )
+                            else:
+                                # 还没有 project.md：只写协作规则
+                                sh_dir.mkdir(parents=True, exist_ok=True)
+                                content = build_project_md(
+                                    project_path.name, "", "", "", "",
+                                    workflows=workflow_details,
+                                )
+                            project_file.write_text(content, encoding="utf-8")
+                            written.append({"name": "项目记忆", "path": str(project_file)})
                 self.send_json({"ok": True, "outputs": written})
             except Exception as e:
                 self.send_json({"ok": False, "error": str(e)}, status=500)
@@ -612,7 +662,23 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 sh_dir = project_path / ".sorting-hat"
                 sh_dir.mkdir(parents=True, exist_ok=True)
                 project_file = sh_dir / "project.md"
-                content = build_project_md(name or project_path.name, tech_stack, conventions, gotcha, persona_override)
+                # 如果绑定了 profile，顺带把该 profile 的 workflows 写进去
+                workflow_details = []
+                if profile_id:
+                    pdir = DEFAULT_PROFILE_STORE_DIR.expanduser() / "profiles" / profile_id
+                    pjson_path = pdir / "profile.json"
+                    if pjson_path.exists():
+                        pdata = json.loads(pjson_path.read_text(encoding="utf-8"))
+                        for wref in pdata.get("workflows", []):
+                            wfile = pdir / wref
+                            if wfile.exists():
+                                fields = parse_workflow_fields(wfile.read_text(encoding="utf-8"))
+                                fields["id"] = wfile.stem
+                                workflow_details.append(fields)
+                content = build_project_md(
+                    name or project_path.name, tech_stack, conventions, gotcha, persona_override,
+                    workflows=workflow_details if workflow_details else None,
+                )
                 project_file.write_text(content, encoding="utf-8")
                 # 绑定到 profile
                 if profile_id:
