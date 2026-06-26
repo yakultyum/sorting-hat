@@ -104,6 +104,35 @@ metadata:
 
 **角色特质**（如有）
 [由 Q10 提取]
+
+**项目记忆**
+每次开始任务前，检查当前工作目录下是否存在 `.sorting-hat/project.md`。如果存在，读取其内容，并以其中的设置覆盖上方对应的行为准则。
+```
+
+## project.md 模板
+
+`<project>/.sorting-hat/project.md`，由档案页「项目记忆 → 新建」或 `POST /projects` 生成：
+
+```markdown
+# 项目名称
+
+> 由 Sorting Hat 生成的项目记忆文件。AI 在处理本项目任务前应读取本文件。
+
+## 技术栈
+
+[用户填写]
+
+## 约定
+
+[用户填写]
+
+## Gotcha
+
+[用户填写]
+
+## 人设覆盖
+
+[用户填写，覆盖全局 persona.md 中对应的行为准则]
 ```
 
 ## 全局 profile 仓库

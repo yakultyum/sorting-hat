@@ -117,9 +117,11 @@ def write_profile_store(store_dir, file_content, prompt_content, answers):
     profile_dir.mkdir(parents=True, exist_ok=True)
     profile_json_path = profile_dir / "profile.json"
     existing_workflows = []
+    existing_bound_projects = []
     if profile_json_path.exists():
         existing_profile = json.loads(profile_json_path.read_text(encoding="utf-8"))
         existing_workflows = existing_profile.get("workflows", [])
+        existing_bound_projects = existing_profile.get("bound_projects", [])
 
     profile_payload = {
         "id": profile_id,
@@ -131,6 +133,8 @@ def write_profile_store(store_dir, file_content, prompt_content, answers):
     }
     if existing_workflows:
         profile_payload["workflows"] = existing_workflows
+    if existing_bound_projects:
+        profile_payload["bound_projects"] = existing_bound_projects
     profile_json_path.write_text(json.dumps(profile_payload, ensure_ascii=False, indent=2), encoding="utf-8")
     (profile_dir / "persona.md").write_text(file_content, encoding="utf-8")
     (profile_dir / "prompt.md").write_text(prompt_content, encoding="utf-8")
@@ -213,69 +217,129 @@ def format_use_profile(profile):
 {profile.get('prompt', '')}"""
 
 
-def infer_workflow_rule(source_text):
-    source_text = (source_text or "").strip()
-    if "继续优化" in source_text or "连续优化" in source_text or "Darwin" in source_text:
-        return {
-            "trigger": "用户要求继续优化、复评分、沿用上一轮评估框架，或要求对 skill/prompt/workflow 做连续小步迭代。",
-            "human_action": "用户指定评估框架、质量维度或验证方式，并要求 AI 收敛到一个明确改动点。",
-            "ai_response": "沿用上一轮框架，选择一个明确维度，小步修改，运行验证，给出复评分和下一轮建议。",
-            "anti_example": "泛泛发散、重开一套评估标准、一次性大改多个方向，或未验证就宣布优化完成。",
-            "verification_prompt": "继续优化：沿用上一轮评分框架，只选择一个维度小步修改，运行验证，并给出复评分。",
-        }
-    if "验证" in source_text or "证据" in source_text or "完成" in source_text:
-        return {
-            "trigger": "用户要求 AI 在声明完成、修复或通过前先验证，并给出可检查证据。",
-            "human_action": "用户要求先运行验证命令、读取输出，再基于证据汇报状态。",
-            "ai_response": "先明确验证命令，运行并读取结果；只有输出确认通过后才声明完成，否则报告实际失败点。",
-            "anti_example": "未运行验证就说应该好了、可能通过，或只凭代码变更推断任务完成。",
-            "verification_prompt": "完成前先验证：运行相关检查，读取输出，并用证据说明是否通过。",
-        }
-    return {
-        "trigger": "用户纠正 AI 的协作方式，要求后续在相似场景复用该工作习惯。",
-        "human_action": "用户指出期望的收敛方式、质量标准、工具使用或验证要求。",
-        "ai_response": "将用户要求抽象成可复用规则；后续遇到同类场景时先按该规则行动，再汇报结果。",
-        "anti_example": "保存原始对话、复述零散细节，或把一次性偏好误当成永久规则。",
-        "verification_prompt": "根据这条协作规则处理一个相似任务，并说明触发场景、执行动作和验证方式。",
+def build_project_md(name, tech_stack, conventions, gotcha, persona_override):
+    parts = [f"# {name}\n\n> 由 Sorting Hat 生成的项目记忆文件。AI 在处理本项目任务前应读取本文件。\n"]
+    if tech_stack:
+        parts.append(f"## 技术栈\n\n{tech_stack}\n")
+    if conventions:
+        parts.append(f"## 约定\n\n{conventions}\n")
+    if gotcha:
+        parts.append(f"## Gotcha\n\n{gotcha}\n")
+    if persona_override:
+        parts.append(f"## 人设覆盖\n\n{persona_override}\n")
+    return "\n".join(parts)
+
+
+def parse_project_fields(text):
+    fields = {"name": "", "tech_stack": "", "conventions": "", "gotcha": "", "persona_override": ""}
+    section_map = {
+        "技术栈": "tech_stack",
+        "约定":   "conventions",
+        "Gotcha": "gotcha",
+        "人设覆盖": "persona_override",
     }
+    for line in text.splitlines():
+        if line.startswith("# "):
+            fields["name"] = line[2:].strip()
+            break
+    current_key = None
+    buf = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("## "):
+            if current_key and buf:
+                fields[current_key] = "\n".join(buf).strip()
+            heading = stripped[3:].strip()
+            current_key = section_map.get(heading)
+            buf = []
+        elif current_key is not None:
+            if stripped.startswith(">"):
+                continue
+            buf.append(line)
+    if current_key and buf:
+        fields[current_key] = "\n".join(buf).strip()
+    return fields
 
 
-def build_workflow_reflection(source_text, title="协作复盘规则"):
-    rule = infer_workflow_rule(source_text)
+def parse_workflow_fields(text):
+    """从 workflow markdown 里提取五个字段，返回 dict。"""
+    fields = {
+        "title": "",
+        "trigger": "",
+        "human_action": "",
+        "ai_response": "",
+        "anti_example": "",
+        "verification_prompt": "",
+    }
+    # 提取标题（第一行 # ...）
+    for line in text.splitlines():
+        line = line.strip()
+        if line.startswith("# "):
+            fields["title"] = line[2:].strip()
+            break
+
+    section_map = {
+        "触发场景":     "trigger",
+        "人的主导动作": "human_action",
+        "AI 应如何响应": "ai_response",
+        "反例":         "anti_example",
+        "验证 prompt":  "verification_prompt",
+    }
+    current_key = None
+    buf = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("## "):
+            if current_key and buf:
+                fields[current_key] = "\n".join(buf).strip()
+            heading = stripped[3:].strip()
+            current_key = section_map.get(heading)
+            buf = []
+        elif current_key is not None:
+            if stripped.startswith(">"):
+                continue  # 跳过生成说明行
+            buf.append(line)
+    if current_key and buf:
+        fields[current_key] = "\n".join(buf).strip()
+    return fields
+
+
+
+def build_workflow_reflection(title, trigger="", human_action="", ai_response="", anti_example="", verification_prompt=""):
     return f"""# {title}
 
 > 由 Sorting Hat reflect 生成。该文件只保存抽象协作规则，不保存聊天原文。
 
 ## 触发场景
 
-{rule['trigger']}
+{trigger}
 
 ## 人的主导动作
 
-{rule['human_action']}
+{human_action}
 
 ## AI 应如何响应
 
-{rule['ai_response']}
+{ai_response}
 
 ## 反例
 
-{rule['anti_example']}
+{anti_example}
 
 ## 验证 prompt
 
-{rule['verification_prompt']}
+{verification_prompt}
 """
 
 
-def save_workflow_reflection(store_dir, profile_selector, source_text, title="协作复盘规则"):
+def save_workflow_reflection(store_dir, profile_selector, title, trigger, human_action, ai_response, anti_example, verification_prompt):
     profile = use_profile(store_dir, profile_selector)
     profile_dir = Path(profile["profile_path"]).parent
     workflow_id = profile_id_from_name(title)
     workflows_dir = profile_dir / "workflows"
     workflows_dir.mkdir(parents=True, exist_ok=True)
     workflow_path = workflows_dir / f"{workflow_id}.md"
-    workflow = build_workflow_reflection(source_text, title)
+    workflow = build_workflow_reflection(title, trigger, human_action, ai_response, anti_example, verification_prompt)
     workflow_path.write_text(workflow, encoding="utf-8")
 
     profile_json_path = Path(profile["profile_path"])
@@ -362,6 +426,59 @@ class Handler(http.server.BaseHTTPRequestHandler):
         if path == "/state":
             self.send_json(read_saved_state(self.outputs))
             return
+        if path == "/profiles":
+            profiles = list_profiles(DEFAULT_PROFILE_STORE_DIR)
+            enriched = []
+            for p in profiles:
+                item = {
+                    "id": p.get("id"),
+                    "name": p.get("name"),
+                    "scenarios": p.get("scenarios", []),
+                    "is_default": p.get("is_default", False),
+                    "workflows": p.get("workflows", []),
+                    "bound_projects": p.get("bound_projects", []),
+                }
+                profile_dir = Path(p["profile_path"]).parent
+                prompt_path = profile_dir / p.get("prompt_path", "prompt.md")
+                answers_path = profile_dir / p.get("answers_path", "answers.json")
+                item["prompt"] = prompt_path.read_text(encoding="utf-8") if prompt_path.exists() else ""
+                if answers_path.exists():
+                    try:
+                        raw = json.loads(answers_path.read_text(encoding="utf-8"))
+                        item["version"] = raw.get("version", "lite")
+                        item["updated"] = raw.get("updated", "")
+                    except Exception:
+                        item["version"] = "lite"
+                        item["updated"] = ""
+                # 读取 workflow 内容（按字段解析）
+                workflow_details = []
+                for wref in p.get("workflows", []):
+                    wfile = profile_dir / wref
+                    if wfile.exists():
+                        text = wfile.read_text(encoding="utf-8")
+                        fields = parse_workflow_fields(text)
+                        fields["id"] = wfile.stem
+                        workflow_details.append(fields)
+                item["workflow_details"] = workflow_details
+                enriched.append(item)
+            self.send_json(enriched)
+            return
+        # GET /projects?dir=<path>
+        if path == "/projects":
+            from urllib.parse import urlparse, parse_qs
+            qs = parse_qs(urlparse(self.path).query)
+            project_dir = (qs.get("dir") or [""])[0].strip()
+            if not project_dir:
+                self.send_json({"ok": False, "error": "缺少 dir 参数"}, status=400)
+                return
+            project_file = Path(project_dir).expanduser() / ".sorting-hat" / "project.md"
+            if not project_file.exists():
+                self.send_json({"ok": False, "exists": False})
+                return
+            text = project_file.read_text(encoding="utf-8")
+            fields = parse_project_fields(text)
+            self.send_json({"ok": True, "exists": True, "path": str(project_file), **fields})
+            return
         if path == "/" or path == "/index.html":
             filepath = os.path.join(base, "index.html")
             ctype = "text/html"
@@ -392,13 +509,131 @@ class Handler(http.server.BaseHTTPRequestHandler):
         self.wfile.write(resp)
 
     def do_POST(self):
-        if self.path != "/save":
+        path = self.path.split("?")[0]
+        length = int(self.headers.get("Content-Length", 0))
+        body = self.rfile.read(length)
+
+        # POST /profiles — 手写创建新 profile
+        if path == "/profiles":
+            try:
+                data = json.loads(body)
+                name     = (data.get("name") or "").strip()
+                scenarios = data.get("scenarios") or ["日常助理 / 通用协作"]
+                prompt   = (data.get("prompt") or "").strip()
+                if not name:
+                    self.send_json({"ok": False, "error": "名称不能为空"}, status=400)
+                    return
+                profile_id  = profile_id_from_name(name)
+                store_dir   = DEFAULT_PROFILE_STORE_DIR.expanduser()
+                profile_dir = store_dir / "profiles" / profile_id
+                profile_dir.mkdir(parents=True, exist_ok=True)
+                profile_payload = {
+                    "id": profile_id, "name": name, "scenarios": scenarios,
+                    "persona_path": "persona.md", "prompt_path": "prompt.md",
+                    "answers_path": "answers.json",
+                }
+                (profile_dir / "profile.json").write_text(
+                    json.dumps(profile_payload, ensure_ascii=False, indent=2), encoding="utf-8")
+                (profile_dir / "prompt.md").write_text(prompt, encoding="utf-8")
+                (profile_dir / "persona.md").write_text(prompt, encoding="utf-8")
+                (profile_dir / "answers.json").write_text(
+                    json.dumps({"version": "manual", "answers": {}, "profile": {"name": name, "scenarios": scenarios}},
+                               ensure_ascii=False, indent=2), encoding="utf-8")
+                # 更新 index
+                index_path = store_dir / "index.json"
+                index = json.loads(index_path.read_text(encoding="utf-8")) if index_path.exists() else \
+                    {"version": 1, "default_profile": profile_id, "profiles": []}
+                index["profiles"] = [p for p in index.get("profiles", []) if p.get("id") != profile_id]
+                index["profiles"].append({"id": profile_id, "name": name, "scenarios": scenarios,
+                                          "path": f"profiles/{profile_id}/profile.json"})
+                index.setdefault("default_profile", profile_id)
+                index_path.write_text(json.dumps(index, ensure_ascii=False, indent=2), encoding="utf-8")
+                self.send_json({"ok": True, "profileId": profile_id, "profileDir": str(profile_dir)})
+            except Exception as e:
+                self.send_json({"ok": False, "error": str(e)}, status=500)
+            return
+
+        # POST /profiles/<id>/activate — 激活 profile 到工具/项目
+        parts = path.strip("/").split("/")
+        if len(parts) == 3 and parts[0] == "profiles" and parts[2] == "activate":
+            try:
+                data        = json.loads(body) if body else {}
+                profile_id  = parts[1]
+                target      = data.get("target", "claude")
+                project_dir = data.get("project_dir", "")
+                store_dir   = DEFAULT_PROFILE_STORE_DIR.expanduser()
+                profile_dir = store_dir / "profiles" / profile_id
+                prompt_path = profile_dir / "prompt.md"
+                if not prompt_path.exists():
+                    self.send_json({"ok": False, "error": f"找不到 profile：{profile_id}"}, status=404)
+                    return
+                prompt_text = prompt_path.read_text(encoding="utf-8")
+                outputs = resolve_outputs(target, None, project_dir or ".")
+                written = []
+                for output in outputs:
+                    if output.path is None:
+                        written.append({"name": output.name, "kind": "prompt", "content": prompt_text})
+                        continue
+                    output.path.parent.mkdir(parents=True, exist_ok=True)
+                    backup_existing_file(output.path)
+                    content = prompt_text
+                    output.path.write_text(content, encoding="utf-8")
+                    written.append({"name": output.name, "path": str(output.path)})
+                # 记录 bound_projects
+                if project_dir and target in ("cursor", "windsurf", "generic"):
+                    profile_json_path = profile_dir / "profile.json"
+                    pdata = json.loads(profile_json_path.read_text(encoding="utf-8"))
+                    bound = pdata.get("bound_projects", [])
+                    entry = {"dir": project_dir, "target": target}
+                    if entry not in bound:
+                        bound.append(entry)
+                    pdata["bound_projects"] = bound
+                    profile_json_path.write_text(json.dumps(pdata, ensure_ascii=False, indent=2), encoding="utf-8")
+                self.send_json({"ok": True, "outputs": written})
+            except Exception as e:
+                self.send_json({"ok": False, "error": str(e)}, status=500)
+            return
+
+        # POST /projects — 创建或更新项目记忆
+        if path == "/projects":
+            try:
+                data        = json.loads(body) if body else {}
+                project_dir = (data.get("project_dir") or "").strip()
+                if not project_dir:
+                    self.send_json({"ok": False, "error": "project_dir 不能为空"}, status=400)
+                    return
+                profile_id       = data.get("profile_id", "")
+                name             = data.get("name", "")
+                tech_stack       = data.get("tech_stack", "")
+                conventions      = data.get("conventions", "")
+                gotcha           = data.get("gotcha", "")
+                persona_override = data.get("persona_override", "")
+                project_path = Path(project_dir).expanduser()
+                sh_dir = project_path / ".sorting-hat"
+                sh_dir.mkdir(parents=True, exist_ok=True)
+                project_file = sh_dir / "project.md"
+                content = build_project_md(name or project_path.name, tech_stack, conventions, gotcha, persona_override)
+                project_file.write_text(content, encoding="utf-8")
+                # 绑定到 profile
+                if profile_id:
+                    pjson = DEFAULT_PROFILE_STORE_DIR.expanduser() / "profiles" / profile_id / "profile.json"
+                    if pjson.exists():
+                        pdata = json.loads(pjson.read_text(encoding="utf-8"))
+                        bound = pdata.get("bound_projects", [])
+                        entry = {"dir": project_dir, "target": "project-memory"}
+                        if entry not in bound:
+                            bound.append(entry)
+                        pdata["bound_projects"] = bound
+                        pjson.write_text(json.dumps(pdata, ensure_ascii=False, indent=2), encoding="utf-8")
+                self.send_json({"ok": True, "path": str(project_file)})
+            except Exception as e:
+                self.send_json({"ok": False, "error": str(e)}, status=500)
+            return
+
+        if path != "/save":
             self.send_response(404)
             self.end_headers()
             return
-
-        length = int(self.headers.get("Content-Length", 0))
-        body = self.rfile.read(length)
 
         try:
             data = json.loads(body)
@@ -437,10 +672,87 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(err)
 
+    def do_PUT(self):
+        path = self.path.split("?")[0]
+        length = int(self.headers.get("Content-Length", 0))
+        body = self.rfile.read(length)
+
+        try:
+            data = json.loads(body) if body else {}
+        except Exception:
+            self.send_json({"ok": False, "error": "请求体不是合法 JSON"}, status=400)
+            return
+
+        # PUT /profiles/<id>/prompt  → 更新 prompt.md
+        parts = path.strip("/").split("/")
+        if len(parts) == 3 and parts[0] == "profiles" and parts[2] == "prompt":
+            profile_id = parts[1]
+            new_prompt = data.get("prompt", "")
+            if not new_prompt:
+                self.send_json({"ok": False, "error": "prompt 字段不能为空"}, status=400)
+                return
+            profile_dir = DEFAULT_PROFILE_STORE_DIR / "profiles" / profile_id
+            if not profile_dir.exists():
+                self.send_json({"ok": False, "error": f"找不到 profile：{profile_id}"}, status=404)
+                return
+            prompt_path = profile_dir / "prompt.md"
+            prompt_path.write_text(new_prompt, encoding="utf-8")
+            self.send_json({"ok": True, "path": str(prompt_path)})
+            return
+
+        # PUT /profiles/<id>/workflows/<wid>  → 按字段更新 workflow markdown
+        if len(parts) == 4 and parts[0] == "profiles" and parts[2] == "workflows":
+            profile_id = parts[1]
+            wid = parts[3]
+            profile_dir = DEFAULT_PROFILE_STORE_DIR / "profiles" / profile_id
+            if not profile_dir.exists():
+                self.send_json({"ok": False, "error": f"找不到 profile：{profile_id}"}, status=404)
+                return
+            workflow_path = profile_dir / "workflows" / f"{wid}.md"
+            if not workflow_path.exists():
+                self.send_json({"ok": False, "error": f"找不到 workflow：{wid}"}, status=404)
+                return
+            title    = data.get("title", wid)
+            trigger  = data.get("trigger", "")
+            human    = data.get("human_action", "")
+            ai_resp  = data.get("ai_response", "")
+            anti     = data.get("anti_example", "")
+            verify   = data.get("verification_prompt", "")
+            content = f"""# {title}
+
+> 由 Sorting Hat reflect 生成。该文件只保存抽象协作规则，不保存聊天原文。
+
+## 触发场景
+
+{trigger}
+
+## 人的主导动作
+
+{human}
+
+## AI 应如何响应
+
+{ai_resp}
+
+## 反例
+
+{anti}
+
+## 验证 prompt
+
+{verify}
+"""
+            workflow_path.write_text(content, encoding="utf-8")
+            self.send_json({"ok": True, "path": str(workflow_path)})
+            return
+
+        self.send_response(404)
+        self.end_headers()
+
     def do_OPTIONS(self):
         self.send_response(200)
         self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+        self.send_header("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.end_headers()
 
@@ -466,10 +778,14 @@ def parse_args():
     use_parser.add_argument("profile", help="profile id 或名称")
     use_parser.add_argument("--store-dir", default=os.environ.get("SORTING_HAT_STORE_DIR", str(DEFAULT_PROFILE_STORE_DIR)))
 
-    reflect_parser = subparsers.add_parser("reflect", help="从复盘文本生成 profile workflow")
+    reflect_parser = subparsers.add_parser("reflect", help="写入 AI 已提炼好的 workflow 字段")
     reflect_parser.add_argument("profile", help="profile id 或名称")
-    reflect_parser.add_argument("--source", required=True, help="复盘文本文件路径；只读取后生成抽象规则，不保存原文")
     reflect_parser.add_argument("--title", default="协作复盘规则", help="workflow 标题")
+    reflect_parser.add_argument("--trigger", default="", help="触发场景")
+    reflect_parser.add_argument("--human-action", default="", help="人的主导动作")
+    reflect_parser.add_argument("--ai-response", default="", help="AI 应如何响应")
+    reflect_parser.add_argument("--anti-example", default="", help="反例")
+    reflect_parser.add_argument("--verification-prompt", default="", help="验证 prompt")
     reflect_parser.add_argument("--store-dir", default=os.environ.get("SORTING_HAT_STORE_DIR", str(DEFAULT_PROFILE_STORE_DIR)))
 
     parser.add_argument(
@@ -508,9 +824,16 @@ def main():
             raise SystemExit(str(error))
         return
     if args.command == "reflect":
-        source_text = Path(args.source).expanduser().read_text(encoding="utf-8")
         try:
-            result = save_workflow_reflection(args.store_dir, args.profile, source_text, args.title)
+            result = save_workflow_reflection(
+                args.store_dir, args.profile,
+                title=args.title,
+                trigger=args.trigger,
+                human_action=args.human_action,
+                ai_response=args.ai_response,
+                anti_example=args.anti_example,
+                verification_prompt=args.verification_prompt,
+            )
         except ValueError as error:
             raise SystemExit(str(error))
         print(f"workflow 已保存：{result['path']}")

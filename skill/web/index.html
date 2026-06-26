@@ -537,6 +537,375 @@
   /* ── 隐藏 ── */
   .hidden { display: none !important; }
 
+  /* ── 档案页 ── */
+  .profiles-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.6rem;
+  }
+
+  .profiles-header h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.22em;
+    color: var(--gold-primary);
+    text-transform: uppercase;
+  }
+
+  .profiles-empty {
+    text-align: center;
+    padding: 3rem 0;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.8;
+  }
+
+  .profile-card {
+    border: 1px solid var(--border-dim);
+    border-radius: 3px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+    transition: border-color 0.2s ease;
+  }
+
+  .profile-card:hover {
+    border-color: var(--border-gold);
+  }
+
+  .profile-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.9rem 1.1rem;
+    cursor: pointer;
+    background: var(--bg-elevated);
+    user-select: none;
+  }
+
+  .profile-card-header:hover {
+    background: rgba(201, 168, 76, 0.06);
+  }
+
+  .profile-card-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.82rem;
+    letter-spacing: 0.1em;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .profile-badge-default {
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    color: var(--gold-muted);
+    border: 1px solid var(--gold-dim);
+    padding: 0.1rem 0.4rem;
+    border-radius: 2px;
+  }
+
+  .profile-badge-version {
+    font-size: 0.62rem;
+    color: var(--text-muted);
+    border: 1px solid rgba(122,104,64,0.3);
+    padding: 0.1rem 0.4rem;
+    border-radius: 2px;
+  }
+
+  .profile-card-meta {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-family: 'Noto Serif SC', serif;
+  }
+
+  .profile-card-chevron {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    transition: transform 0.2s ease;
+    margin-left: 0.5rem;
+  }
+
+  .profile-card-chevron.open {
+    transform: rotate(180deg);
+  }
+
+  .profile-card-body {
+    border-top: 1px solid var(--border-dim);
+    padding: 1rem 1.1rem 1.2rem;
+    background: var(--bg-card);
+  }
+
+  .profile-scenarios {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+  }
+
+  .profile-scenario-tag {
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    border: 1px solid var(--border-dim);
+    padding: 0.15rem 0.55rem;
+    border-radius: 2px;
+    font-family: 'Cinzel', serif;
+  }
+
+  .profile-persona-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+    color: var(--gold-muted);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .profile-persona-text {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 0.88rem;
+    line-height: 1.85;
+    color: var(--text-secondary);
+    white-space: pre-wrap;
+    max-height: 320px;
+    overflow-y: auto;
+    padding-right: 0.3rem;
+  }
+
+  .profile-persona-text::-webkit-scrollbar {
+    width: 3px;
+  }
+
+  .profile-persona-text::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .profile-persona-text::-webkit-scrollbar-thumb {
+    background: var(--gold-dim);
+    border-radius: 2px;
+  }
+
+  .profile-persona-text strong {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+
+  .profile-workflows {
+    margin-top: 0.9rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--border-dim);
+  }
+
+  .profile-workflows-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+    color: var(--gold-muted);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .workflow-item {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    padding: 0.25rem 0;
+    font-family: 'Noto Serif SC', serif;
+  }
+
+  .workflow-item::before {
+    content: '·  ';
+    color: var(--gold-dim);
+  }
+
+  /* ── 档案页编辑控件 ── */
+  .profile-edit-btn {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    background: transparent;
+    border: 1px solid var(--border-dim);
+    color: var(--text-muted);
+    padding: 0.2rem 0.6rem;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .profile-edit-btn:hover {
+    border-color: var(--border-gold);
+    color: var(--text-secondary);
+  }
+
+  .profile-edit-btn.saving {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  .profile-persona-editor {
+    width: 100%;
+    min-height: 220px;
+    background: var(--bg-darkest);
+    border: 1px solid var(--border-gold);
+    border-radius: 2px;
+    color: var(--text-secondary);
+    font-family: 'Noto Serif SC', serif;
+    font-size: 0.88rem;
+    line-height: 1.85;
+    padding: 0.8rem 1rem;
+    resize: vertical;
+    outline: none;
+    box-sizing: border-box;
+  }
+
+  .profile-save-notice {
+    font-size: 0.75rem;
+    margin-top: 0.4rem;
+    font-family: 'Noto Serif SC', serif;
+  }
+
+  .profile-save-notice.ok  { color: var(--green); }
+  .profile-save-notice.err { color: var(--red-soft); }
+
+  .workflow-block {
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-dim);
+  }
+
+  .workflow-block:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+
+  .workflow-block-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .workflow-field-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.63rem;
+    letter-spacing: 0.14em;
+    color: var(--gold-muted);
+    text-transform: uppercase;
+    margin: 0.6rem 0 0.25rem;
+  }
+
+  .workflow-field-text {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 0.85rem;
+    line-height: 1.75;
+    color: var(--text-secondary);
+    white-space: pre-wrap;
+  }
+
+  .workflow-field-editor {
+    width: 100%;
+    min-height: 60px;
+    background: var(--bg-darkest);
+    border: 1px solid var(--border-gold);
+    border-radius: 2px;
+    color: var(--text-secondary);
+    font-family: 'Noto Serif SC', serif;
+    font-size: 0.85rem;
+    line-height: 1.75;
+    padding: 0.5rem 0.7rem;
+    resize: vertical;
+    outline: none;
+    box-sizing: border-box;
+  }
+
+  /* ── 激活 & 项目记忆 ── */
+  .profile-activate-section {
+    margin-top: 0.9rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--border-dim);
+  }
+
+  .profile-section-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+    color: var(--gold-muted);
+    text-transform: uppercase;
+    margin-bottom: 0.7rem;
+  }
+
+  .activate-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .activate-row input[type="text"] {
+    flex: 1;
+    min-width: 160px;
+    background: var(--bg-darkest);
+    border: 1px solid var(--border-dim);
+    border-radius: 2px;
+    color: var(--text-secondary);
+    font-family: 'Noto Serif SC', serif;
+    font-size: 0.82rem;
+    padding: 0.35rem 0.7rem;
+    outline: none;
+  }
+
+  .activate-row input[type="text"]:focus {
+    border-color: var(--border-gold);
+  }
+
+  .bound-project-item {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    padding: 0.2rem 0;
+    font-family: 'Noto Serif SC', serif;
+    display: flex;
+    gap: 0.5rem;
+    align-items: baseline;
+  }
+
+  .bound-project-tag {
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+    color: var(--gold-muted);
+    border: 1px solid var(--gold-dim);
+    padding: 0.1rem 0.35rem;
+    border-radius: 2px;
+    font-family: 'Cinzel', serif;
+    flex-shrink: 0;
+  }
+
+  .project-memory-block {
+    margin-top: 0.6rem;
+    padding: 0.8rem 1rem;
+    background: var(--bg-darkest);
+    border: 1px solid var(--border-dim);
+    border-radius: 2px;
+  }
+
+  .project-memory-form {
+    margin-top: 0.8rem;
+  }
+
+  .project-field-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.63rem;
+    letter-spacing: 0.14em;
+    color: var(--gold-muted);
+    text-transform: uppercase;
+    margin: 0.6rem 0 0.25rem;
+  }
+
   /* ── 版本徽章 ── */
   .badge {
     display: inline-block;
@@ -598,12 +967,14 @@
       </div>
     </div>
     <button class="btn-confirm" id="btnConfirm" onclick="confirmStart()" disabled>
-      ✦ &nbsp;确认开始分院
+      ✦ &nbsp;开始分院问卷
     </button>
-    <button class="btn-back" onclick="loadEditMode()" style="width:100%;margin-top:0.8rem;">
-      修改已有维度
+    <button class="btn-back" onclick="show('pageManualCreate')" style="width:100%;margin-top:0.8rem;">
+      ✎ &nbsp;直接手写人设
     </button>
-    <div id="editModePanel" class="hidden" style="margin-top:1rem;"></div>
+    <button class="btn-back" onclick="openProfilesPage()" style="width:100%;margin-top:0.5rem;">
+      📂 &nbsp;我的档案
+    </button>
   </div>
 
   <!-- ② 问卷页 -->
@@ -629,6 +1000,15 @@
     <div id="openWrap" class="hidden">
       <textarea class="open-input" id="openInput" placeholder="请在此输入…" rows="3"></textarea>
       <p class="skip-hint" id="skipHint"></p>
+    </div>
+
+    <!-- 偏好题（喜欢 / 不喜欢） -->
+    <div id="preferencesWrap" class="hidden">
+      <p class="skip-hint" style="margin-bottom:0.5rem;">可选填，也可以直接跳过。</p>
+      <label style="font-size:0.8rem;color:var(--text-muted);letter-spacing:0.05em;display:block;margin-bottom:0.3rem;">✦ 喜欢——我希望 AI 这样做</label>
+      <textarea class="open-input" id="prefLikes" placeholder="例如：说话带点语气词、偶尔主动给额外补充、用类比解释抽象概念…" rows="3" style="margin-bottom:1rem;"></textarea>
+      <label style="font-size:0.8rem;color:var(--text-muted);letter-spacing:0.05em;display:block;margin-bottom:0.3rem;">✦ 不喜欢——我希望 AI 避免这样</label>
+      <textarea class="open-input" id="prefDislikes" placeholder="例如：不要在每次回答结尾说"希望这个回答对你有帮助"、不要主动总结我说过的话…" rows="3"></textarea>
     </div>
 
     <div class="nav-btns">
@@ -663,6 +1043,58 @@
       <button class="btn-back" onclick="restartQuiz()">重新分院</button>
       <button class="btn-next" id="btnSave" onclick="savePersona()">保存人设 ✓</button>
     </div>
+  </div>
+
+  <!-- ⑤ 手写创建页 -->
+  <div id="pageManualCreate" class="hidden">
+    <div class="profiles-header">
+      <h2>✎ 手写人设</h2>
+      <button onclick="show('pageWelcome')" style="font-family:'Cinzel',serif;font-size:0.68rem;letter-spacing:0.1em;background:transparent;border:none;color:var(--text-muted);cursor:pointer;padding:0.2rem 0;">← 返回</button>
+    </div>
+
+    <div style="margin-bottom:1.2rem;">
+      <div class="profile-persona-label" style="margin-bottom:0.4rem;">Profile 名称</div>
+      <input id="manualName" type="text" class="open-input"
+        style="min-height:0;padding:0.6rem 1rem;font-size:0.92rem;"
+        placeholder="例如：严格工程搭档、写作编辑顾问…">
+    </div>
+
+    <div style="margin-bottom:1.2rem;">
+      <div class="profile-persona-label" style="margin-bottom:0.4rem;">适用场景（可多选）</div>
+      <div id="manualScenarios" class="options" style="gap:0.5rem;"></div>
+    </div>
+
+    <div style="margin-bottom:1rem;">
+      <div class="profile-persona-label" style="margin-bottom:0.4rem;">人设描述</div>
+      <textarea id="manualPrompt" class="open-input" rows="10" spellcheck="false"
+        placeholder="直接写 AI 应当遵守的行为准则。例如：
+
+你是用户的工作助手。以下是你的行为准则：
+
+**沟通规则**
+- 结论先行，附关键推理
+- 有问题直接说，不绕弯子
+- 使用标题和列表组织回复
+
+**专业背景**
+默认用户熟悉后端工程领域，不解释基础概念。"></textarea>
+    </div>
+
+    <div id="manualNotice" class="profile-save-notice hidden" style="margin-bottom:0.8rem;"></div>
+
+    <div class="nav-btns">
+      <button class="btn-back" onclick="show('pageWelcome')">← 取消</button>
+      <button class="btn-next" onclick="saveManualProfile()">保存人设 ✓</button>
+    </div>
+  </div>
+
+  <!-- ⑥ 档案页 -->
+  <div id="pageProfiles" class="hidden">
+    <div class="profiles-header">
+      <h2>✦ 我的档案</h2>
+      <button onclick="show('pageWelcome')" style="font-family:'Cinzel',serif;font-size:0.68rem;letter-spacing:0.1em;background:transparent;border:none;color:var(--text-muted);cursor:pointer;padding:0.2rem 0;">← 返回</button>
+    </div>
+    <div id="profilesList"></div>
   </div>
 
 </div>
@@ -787,6 +1219,11 @@ const QUESTIONS_LITE = [
     id: 'role', phase: 'Phase 6 · 个性化', type: 'open', skippable: true,
     text: '如果你希望 AI 的说话风格融合某个角色的特质，请描述：',
     skipHint: '可跳过。例如："周棋洛"、"赫敏·格兰杰"、"一个说话毒舌但超级聪明的导师"'
+  },
+  {
+    id: 'preferences', phase: 'Phase 6 · 个性化', type: 'preferences', skippable: true,
+    text: '你对 AI 的交互方式，有什么特别喜欢或不喜欢的？',
+    skipHint: '可选填。这里说的是 AI 说话的习惯、行为模式，比如喜欢它偶尔说语气词，或者不喜欢它在结尾总结。'
   },
   {
     id: 'profile_name', phase: 'Phase 7 · Profile 档案', type: 'open', skippable: true,
@@ -1189,6 +1626,11 @@ const QUESTIONS_FULL = [
     skipHint: '可跳过。可以是真实的人，虚构角色，也可以是一种感觉。'
   },
   {
+    id: 'preferences', phase: 'Phase 8 · 个性化', type: 'preferences', skippable: true,
+    text: '你对 AI 的交互方式，有什么特别喜欢或不喜欢的？',
+    skipHint: '可选填。这里说的是 AI 说话的习惯、行为模式，比如喜欢它偶尔说语气词，或者不喜欢它在结尾总结。'
+  },
+  {
     id: 'profile_name', phase: 'Phase 9 · Profile 档案', type: 'open', skippable: true,
     text: '给这套 AI 人设起个名字，方便以后在不同项目里调用。',
     skipHint: '可跳过，Sorting Hat 会自动推荐。例：严格工程搭档、产品共创伙伴、Darwin 优化器、写作编辑顾问。'
@@ -1229,6 +1671,7 @@ const DIMENSIONS = [
   { id: 'domain', label: '专业领域', lite: ['domain'], full: ['domain'] },
   { id: 'name', label: '称呼', lite: ['name'], full: ['name'] },
   { id: 'role', label: '角色融合', lite: ['role'], full: ['role'] },
+  { id: 'preferences', label: '交互偏好', lite: ['preferences'], full: ['preferences'] },
   { id: 'profile', label: 'Profile 名称与场景', lite: ['profile_name', 'profile_scenarios'], full: ['profile_name', 'profile_scenarios'] }
 ];
 
@@ -1241,29 +1684,9 @@ let answers = {};
 let version = '';
 let nameInput = '';
 let mode = 'create';
-let editDimension = null;
 
 function getQuestionBank(v) {
   return (v === 'full') ? QUESTIONS_FULL : QUESTIONS_LITE;
-}
-
-function findQuestionsByIds(v, ids) {
-  const bank = getQuestionBank(v);
-  return ids.map(id => bank.find(q => q.id === id)).filter(Boolean);
-}
-
-function getDimensionQuestionIds(dimension, v) {
-  return dimension[v === 'full' ? 'full' : 'lite'] || dimension.lite;
-}
-
-function normalizeSavedAnswers(savedAnswers) {
-  const copy = { ...(savedAnswers || {}) };
-  delete copy.version;
-  return copy;
-}
-
-function showEditBanner(text) {
-  document.getElementById('phaseLabel').textContent = text;
 }
 
 // ──────────────────────────────────────────────
@@ -1283,63 +1706,12 @@ function confirmStart() {
   startQuiz(version);
 }
 
-function loadEditMode() {
-  const panel = document.getElementById('editModePanel');
-  panel.className = '';
-  panel.innerHTML = '<p class="skip-hint">正在读取已保存的人设答案…</p>';
-
-  fetch('/state')
-    .then(r => r.json())
-    .then(state => {
-      if (!state.ok) {
-        panel.innerHTML = `<div class="error-msg">${state.error || '没有找到已保存的人设答案，请先完整分院一次。'}</div>`;
-        return;
-      }
-
-      const savedVersion = state.version || 'lite';
-      const cards = DIMENSIONS.map(dimension => `
-        <button class="option-btn" onclick="startDimensionEditFromPanel('${dimension.id}')">
-          <span class="option-letter">✦</span><span>${dimension.label}</span>
-        </button>
-      `).join('');
-
-      window._savedState = state;
-      panel.innerHTML = `
-        <p class="skip-hint">已读取 ${state.answersPath || '已保存答案'}。请选择要修改的维度：</p>
-        <div class="options">${cards}</div>
-      `;
-      version = savedVersion;
-    })
-    .catch(() => {
-      panel.innerHTML = '<div class="error-msg">无法读取已保存答案。请确认本地服务器已启动。</div>';
-    });
-}
-
-function startDimensionEditFromPanel(dimensionId) {
-  const state = window._savedState;
-  const dimension = DIMENSIONS.find(item => item.id === dimensionId);
-  if (!state || !dimension) return;
-  startDimensionEdit(state.version || 'lite', state.answers || {}, dimension);
-}
-
 function startQuiz(v) {
   mode = 'create';
-  editDimension = null;
   version = v;
   questions = getQuestionBank(v);
   current = 0;
   answers = {};
-  show('pageQuiz');
-  renderQuestion();
-}
-
-function startDimensionEdit(savedVersion, savedAnswers, dimension) {
-  mode = 'edit';
-  editDimension = dimension;
-  version = savedVersion || 'lite';
-  answers = normalizeSavedAnswers(savedAnswers);
-  questions = findQuestionsByIds(version, getDimensionQuestionIds(dimension, version));
-  current = 0;
   show('pageQuiz');
   renderQuestion();
 }
@@ -1357,13 +1729,13 @@ function renderQuestion() {
   const q = questions[current];
   const pct = Math.round((current / questions.length) * 100);
   const isLastQuestion = current === questions.length - 1;
-  const nextLabel = mode === 'edit' && isLastQuestion ? '更新人设 ✨' : (isLastQuestion ? '生成人设 ✨' : '下一题 →');
+  const nextLabel = isLastQuestion ? '生成人设 ✨' : '下一题 →';
 
   document.getElementById('progressPhase').textContent = q.phase;
   document.getElementById('progressPct').textContent = pct + '%';
   document.getElementById('progressFill').style.width = pct + '%';
-  document.getElementById('phaseLabel').textContent = mode === 'edit' ? `正在修改 · ${editDimension.label}` : q.phase;
-  document.getElementById('questionNum').textContent = mode === 'edit' ? `修改 ${editDimension.label} · ${current + 1} / ${questions.length}` : `问题 ${current + 1} / ${questions.length}`;
+  document.getElementById('phaseLabel').textContent = q.phase;
+  document.getElementById('questionNum').textContent = `问题 ${current + 1} / ${questions.length}`;
   document.getElementById('questionText').textContent = q.text;
   document.getElementById('btnBack').style.visibility = current === 0 ? 'hidden' : 'visible';
 
@@ -1375,6 +1747,7 @@ function renderQuestion() {
   if (q.type === 'choice' || q.type === 'scale' || q.type === 'multi') {
     optWrap.classList.remove('hidden');
     openWrap.classList.add('hidden');
+    document.getElementById('preferencesWrap').classList.add('hidden');
     optWrap.innerHTML = '';
 
     const letters = ['A','B','C','D','E','F','G'];
@@ -1395,9 +1768,17 @@ function renderQuestion() {
 
     btnNext.textContent = nextLabel;
 
+  } else if (q.type === 'preferences') {
+    optWrap.classList.add('hidden');
+    openWrap.classList.add('hidden');
+    document.getElementById('preferencesWrap').classList.remove('hidden');
+    document.getElementById('prefLikes').value = answers[q.id]?.likes || '';
+    document.getElementById('prefDislikes').value = answers[q.id]?.dislikes || '';
+    btnNext.textContent = isLastQuestion ? nextLabel : '跳过 / 下一题 →';
   } else {
     optWrap.classList.add('hidden');
     openWrap.classList.remove('hidden');
+    document.getElementById('preferencesWrap').classList.add('hidden');
     openInput.value = answers[q.id]?.text || '';
     document.getElementById('skipHint').textContent = q.skipHint || '';
     btnNext.textContent = isLastQuestion ? nextLabel : (q.skippable ? '跳过 / 下一题 →' : '下一题 →');
@@ -1461,6 +1842,10 @@ function nextQuestion() {
       return;
     }
     answers[q.id] = { text: val };
+  } else if (q.type === 'preferences') {
+    const likes = document.getElementById('prefLikes').value.trim();
+    const dislikes = document.getElementById('prefDislikes').value.trim();
+    answers[q.id] = { likes, dislikes };
   } else if (q.type === 'multi') {
     if (!answers[q.id]?.indexes?.length) {
       document.getElementById('optionsWrap').style.opacity = '0.5';
@@ -1499,8 +1884,8 @@ function generatePersona() {
     const persona = buildPersona();
     window._personaContent = persona;
     document.getElementById('resultPersona').innerHTML = persona.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    document.querySelector('#pageResult h2 span').textContent = mode === 'edit' ? `✦ 已更新：${editDimension.label}` : '✦ 你的人设档案';
-    document.getElementById('btnSave').textContent = mode === 'edit' ? '保存更新 ✓' : '保存人设 ✓';
+    document.querySelector('#pageResult h2 span').textContent = '✦ 你的人设档案';
+    document.getElementById('btnSave').textContent = '保存人设 ✓';
     show('pageResult');
   }, 3200);
 }
@@ -1515,6 +1900,8 @@ function buildPersona() {
   const role   = a.role?.text   || '';
   const nameTrait = a.name?.trait    || '务实型';
   const nameVal   = a.name?.nameValue || '';
+  const prefLikes    = a.preferences?.likes    || '';
+  const prefDislikes = a.preferences?.dislikes || '';
 
   // 简易版字段
   const q1trait  = a.q1?.trait  || '';
@@ -1790,9 +2177,22 @@ function buildPersona() {
     persona += '\n';
   }
 
-  if (mbti && mbti !== '未填写') {
-    persona += `**认知底色参考**\nMBTI：${mbti}，结合以上答案理解认知倾向，不直接套用类型标签。`;
+  if (prefLikes || prefDislikes) {
+    persona += `**交互偏好**\n`;
+    if (prefLikes) {
+      persona += `- 喜欢：${prefLikes}\n`;
+    }
+    if (prefDislikes) {
+      persona += `- 不喜欢：${prefDislikes}\n`;
+    }
+    persona += '\n';
   }
+
+  if (mbti && mbti !== '未填写') {
+    persona += `**认知底色参考**\nMBTI：${mbti}，结合以上答案理解认知倾向，不直接套用类型标签。\n\n`;
+  }
+
+  persona += `**项目记忆**\n每次开始任务前，检查当前工作目录下是否存在 \`.sorting-hat/project.md\`。如果存在，读取其内容，并以其中的设置覆盖上方对应的行为准则。`;
 
   return persona;
 }
@@ -1873,6 +2273,8 @@ function buildFileContent() {
   record += `- 专业领域：${a.domain?.text || '未填写'}\n`;
   record += `- 称呼：${a.name?.trait || '-'}${a.name?.nameValue ? '（' + a.name.nameValue + '）' : ''}\n`;
   record += `- 角色融合：${a.role?.text || '无'}\n`;
+  if (a.preferences?.likes)    record += `- 喜欢：${a.preferences.likes}\n`;
+  if (a.preferences?.dislikes) record += `- 不喜欢：${a.preferences.dislikes}\n`;
 
   return `---
 name: ai-persona
@@ -1938,9 +2340,458 @@ function toggleEditPersona() {
 // 工具
 // ──────────────────────────────────────────────
 function show(pageId) {
-  ['pageWelcome','pageQuiz','pageGenerating','pageResult'].forEach(id => {
+  ['pageWelcome','pageQuiz','pageGenerating','pageResult','pageManualCreate','pageProfiles'].forEach(id => {
     document.getElementById(id).classList.toggle('hidden', id !== pageId);
   });
+  if (pageId === 'pageManualCreate') initManualCreate();
+}
+
+// ──────────────────────────────────────────────
+// 手写创建
+// ──────────────────────────────────────────────
+const SCENARIO_OPTIONS = [
+  '写代码 / 调试', '产品设计 / 用户动线', '文档 / 写作 / 编辑',
+  '研究 / 分析 / 决策', 'skill / prompt / workflow 优化', '日常助理 / 通用协作', '其他'
+];
+
+function initManualCreate() {
+  document.getElementById('manualName').value = '';
+  document.getElementById('manualPrompt').value = '';
+  document.getElementById('manualNotice').classList.add('hidden');
+  const wrap = document.getElementById('manualScenarios');
+  wrap.innerHTML = '';
+  SCENARIO_OPTIONS.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.style.cssText = 'padding:0.4rem 0.8rem;font-size:0.8rem;';
+    btn.textContent = s;
+    btn.dataset.selected = '0';
+    btn.onclick = () => {
+      const sel = btn.dataset.selected === '1';
+      btn.dataset.selected = sel ? '0' : '1';
+      btn.classList.toggle('selected', !sel);
+    };
+    wrap.appendChild(btn);
+  });
+}
+
+function saveManualProfile() {
+  const name   = document.getElementById('manualName').value.trim();
+  const prompt = document.getElementById('manualPrompt').value.trim();
+  const notice = document.getElementById('manualNotice');
+  if (!name) { showNotice(notice, '请填写 Profile 名称', 'err'); return; }
+  if (!prompt) { showNotice(notice, '请填写人设描述', 'err'); return; }
+  const scenarios = Array.from(document.querySelectorAll('#manualScenarios .option-btn'))
+    .filter(b => b.dataset.selected === '1').map(b => b.textContent);
+  fetch('/profiles', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, scenarios: scenarios.length ? scenarios : ['日常助理 / 通用协作'], prompt })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.ok) {
+      showNotice(notice, '已保存，正在跳转到档案页…', 'ok');
+      setTimeout(() => openProfilesPage(), 900);
+    } else {
+      showNotice(notice, data.error || '保存失败', 'err');
+    }
+  })
+  .catch(() => showNotice(notice, '无法连接服务器', 'err'));
+}
+
+// ──────────────────────────────────────────────
+// 档案页
+// ──────────────────────────────────────────────
+function openProfilesPage() {
+  show('pageProfiles');
+  const container = document.getElementById('profilesList');
+  container.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:2rem 0;font-size:0.9rem;">正在读取档案…</p>';
+
+  fetch('/profiles')
+    .then(r => r.json())
+    .then(profiles => renderProfiles(profiles))
+    .catch(() => {
+      container.innerHTML = '<p class="profiles-empty">无法连接本地服务器。<br>请确认已运行 python3 server.py，再刷新页面。</p>';
+    });
+}
+
+function renderProfiles(profiles) {
+  const container = document.getElementById('profilesList');
+
+  if (!profiles || profiles.length === 0) {
+    container.innerHTML = '<p class="profiles-empty">还没有任何档案。<br>完成一次分院后，你的人设就会出现在这里。</p>';
+    return;
+  }
+
+  // 把 profile 数据挂到全局，编辑保存时用
+  window._profiles = profiles;
+
+  container.innerHTML = '';
+  profiles.forEach((p, idx) => {
+    const bodyId    = `pbody-${idx}`;
+    const chevronId = `pchevron-${idx}`;
+
+    const scenariosHtml = (p.scenarios || [])
+      .map(s => `<span class="profile-scenario-tag">${s}</span>`)
+      .join('');
+
+    const versionLabel  = p.version === 'full' ? '深度版' : '简易版';
+    const defaultBadge  = p.is_default
+      ? '<span class="profile-badge-default">默认</span>' : '';
+
+    const workflowsHtml = buildWorkflowsHtml(p, idx);
+
+    const card = document.createElement('div');
+    card.className = 'profile-card';
+    card.innerHTML = `
+      <div class="profile-card-header" onclick="toggleProfileCard('${bodyId}','${chevronId}')">
+        <div class="profile-card-title">
+          ${p.name}
+          ${defaultBadge}
+          <span class="profile-badge-version">${versionLabel}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.8rem;">
+          <span class="profile-card-meta">${(p.scenarios || []).length} 个场景</span>
+          <span class="profile-card-chevron" id="${chevronId}">▼</span>
+        </div>
+      </div>
+      <div class="profile-card-body hidden" id="${bodyId}">
+        <div class="profile-scenarios">${scenariosHtml}</div>
+
+        <!-- 人设描述区 -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+          <div class="profile-persona-label">人设描述</div>
+          <button class="profile-edit-btn" id="editPromptBtn-${idx}"
+            onclick="toggleEditPrompt(${idx})">编辑</button>
+        </div>
+        <div class="profile-persona-text" id="promptDisplay-${idx}">${renderPersonaHtml(p.prompt)}</div>
+        <textarea class="profile-persona-editor hidden" id="promptEditor-${idx}"
+          spellcheck="false">${escapeForAttr(p.prompt)}</textarea>
+        <div class="profile-save-notice hidden" id="promptNotice-${idx}"></div>
+
+        ${workflowsHtml}
+        ${buildActivateSection(p, idx)}
+        ${buildProjectMemorySection(p, idx)}
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function renderPersonaHtml(text) {
+  return (text || '（暂无人设文本）')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+}
+
+function escapeForAttr(text) {
+  return (text || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function buildWorkflowsHtml(p, idx) {
+  const details = p.workflow_details || [];
+  if (details.length === 0) return '';
+
+  const blocksHtml = details.map((wf, wi) => {
+    const FIELDS = [
+      { key: 'trigger',             label: '触发场景' },
+      { key: 'human_action',        label: '人的主导动作' },
+      { key: 'ai_response',         label: 'AI 应如何响应' },
+      { key: 'anti_example',        label: '反例' },
+      { key: 'verification_prompt', label: '验证 prompt' },
+    ];
+    const fieldsHtml = FIELDS.map(f => `
+      <div class="workflow-field-label">${f.label}</div>
+      <div class="workflow-field-text" id="wf-text-${idx}-${wi}-${f.key}">${escapeForAttr(wf[f.key] || '')}</div>
+      <textarea class="workflow-field-editor hidden" id="wf-editor-${idx}-${wi}-${f.key}"
+        rows="3">${escapeForAttr(wf[f.key] || '')}</textarea>
+    `).join('');
+
+    return `
+      <div class="workflow-block" id="wfblock-${idx}-${wi}">
+        <div class="workflow-block-title">
+          <span>${wf.title || wf.id}</span>
+          <button class="profile-edit-btn" id="editWfBtn-${idx}-${wi}"
+            onclick="toggleEditWorkflow(${idx},${wi})">编辑</button>
+        </div>
+        ${fieldsHtml}
+        <div class="profile-save-notice hidden" id="wfNotice-${idx}-${wi}"></div>
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <div class="profile-workflows">
+      <div class="profile-workflows-label">Workflows</div>
+      ${blocksHtml}
+    </div>
+  `;
+}
+
+function buildActivateSection(p, idx) {
+  const bound = (p.bound_projects || []);
+  const claudeActive = bound.some(b => b.target === 'claude') || p.is_default;
+
+  const boundHtml = bound.length
+    ? bound.map(b => `
+        <div class="bound-project-item">
+          <span class="bound-project-tag">${b.target}</span>
+          <span>${b.dir || 'Claude Code 全局'}</span>
+        </div>`).join('')
+    : '<div style="font-size:0.8rem;color:var(--text-muted);padding:0.2rem 0;">尚未激活到任何工具</div>';
+
+  return `
+    <div class="profile-activate-section">
+      <div class="profile-section-label">激活到工具</div>
+      <div class="activate-row">
+        <button class="profile-edit-btn" onclick="activateProfile('${p.id}','claude','',${idx})">
+          ${claudeActive ? '✓ 已激活 · ' : ''}Claude Code
+        </button>
+        <span style="font-size:0.75rem;color:var(--text-muted);">覆盖全局 ~/.claude/memory/persona.md</span>
+      </div>
+      <div class="activate-row">
+        <input type="text" id="projectDir-${idx}" placeholder="项目路径，例如 ~/work/my-project"
+          style="flex:1;min-width:160px;background:var(--bg-darkest);border:1px solid var(--border-dim);border-radius:2px;color:var(--text-secondary);font-family:'Noto Serif SC',serif;font-size:0.82rem;padding:0.35rem 0.7rem;outline:none;">
+        <select id="projectTarget-${idx}" style="background:var(--bg-darkest);border:1px solid var(--border-dim);border-radius:2px;color:var(--text-secondary);font-size:0.8rem;padding:0.35rem 0.5rem;outline:none;cursor:pointer;">
+          <option value="cursor">Cursor</option>
+          <option value="windsurf">Windsurf</option>
+          <option value="generic">通用</option>
+        </select>
+        <button class="profile-edit-btn" onclick="activateProfile('${p.id}',null,null,${idx})">激活到项目</button>
+      </div>
+      <div class="profile-section-label" style="margin-top:0.6rem;">已绑定</div>
+      ${boundHtml}
+      <div class="profile-save-notice hidden" id="activateNotice-${idx}"></div>
+    </div>
+  `;
+}
+
+function buildProjectMemorySection(p, idx) {
+  return `
+    <div class="profile-activate-section">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.7rem;">
+        <div class="profile-section-label" style="margin-bottom:0;">项目记忆</div>
+        <button class="profile-edit-btn" onclick="toggleNewProjectForm(${idx})">+ 新建</button>
+      </div>
+      <div id="projectFormWrap-${idx}" class="hidden">
+        <div class="project-memory-form">
+          <div class="project-field-label">项目路径</div>
+          <input type="text" id="pmDir-${idx}" class="open-input"
+            style="min-height:0;padding:0.5rem 0.8rem;font-size:0.85rem;margin-bottom:0;"
+            placeholder="~/work/my-project">
+          <div class="project-field-label">项目名称（可选）</div>
+          <input type="text" id="pmName-${idx}" class="open-input"
+            style="min-height:0;padding:0.5rem 0.8rem;font-size:0.85rem;margin-bottom:0;"
+            placeholder="My Project">
+          <div class="project-field-label">技术栈</div>
+          <textarea id="pmTech-${idx}" class="workflow-field-editor" rows="2"
+            placeholder="Python 3.12, FastAPI, PostgreSQL, Docker"></textarea>
+          <div class="project-field-label">约定</div>
+          <textarea id="pmConv-${idx}" class="workflow-field-editor" rows="3"
+            placeholder="文件命名用 snake_case，注释用中文，PR 前必须跑 pytest"></textarea>
+          <div class="project-field-label">Gotcha</div>
+          <textarea id="pmGotcha-${idx}" class="workflow-field-editor" rows="2"
+            placeholder="不要动 legacy/ 目录，数据库 migration 必须向后兼容"></textarea>
+          <div class="project-field-label">人设覆盖（可选）</div>
+          <textarea id="pmPersona-${idx}" class="workflow-field-editor" rows="3"
+            placeholder="在这个项目里，回复更简洁，不需要解释基础概念"></textarea>
+          <div class="profile-save-notice hidden" id="pmNotice-${idx}" style="margin-top:0.5rem;"></div>
+          <div style="display:flex;gap:0.5rem;margin-top:0.8rem;">
+            <button class="profile-edit-btn" onclick="toggleNewProjectForm(${idx})">取消</button>
+            <button class="profile-edit-btn" style="border-color:var(--border-gold);color:var(--text-secondary);"
+              onclick="saveProjectMemory('${p.id}',${idx})">保存项目记忆</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+
+function toggleProfileCard(bodyId, chevronId) {
+  const body    = document.getElementById(bodyId);
+  const chevron = document.getElementById(chevronId);
+  const opening = body.classList.contains('hidden');
+  body.classList.toggle('hidden', !opening);
+  chevron.classList.toggle('open', opening);
+}
+
+// ── 人设描述编辑 ──
+function toggleEditPrompt(idx) {
+  const display = document.getElementById(`promptDisplay-${idx}`);
+  const editor  = document.getElementById(`promptEditor-${idx}`);
+  const btn     = document.getElementById(`editPromptBtn-${idx}`);
+  const notice  = document.getElementById(`promptNotice-${idx}`);
+  const editing = !editor.classList.contains('hidden');
+
+  if (editing) {
+    const newText = editor.value;
+    const profileId = window._profiles[idx].id;
+    btn.textContent = '保存中…';
+    btn.classList.add('saving');
+    fetch(`/profiles/${profileId}/prompt`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: newText })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.ok) {
+        window._profiles[idx].prompt = newText;
+        display.innerHTML = renderPersonaHtml(newText);
+        display.classList.remove('hidden');
+        editor.classList.add('hidden');
+        btn.textContent = '编辑';
+        showNotice(notice, '已保存', 'ok');
+      } else {
+        btn.textContent = '完成';
+        showNotice(notice, data.error || '保存失败', 'err');
+      }
+    })
+    .catch(() => {
+      btn.textContent = '完成';
+      showNotice(notice, '无法连接服务器', 'err');
+    })
+    .finally(() => btn.classList.remove('saving'));
+  } else {
+    editor.value = window._profiles[idx].prompt || '';
+    display.classList.add('hidden');
+    editor.classList.remove('hidden');
+    editor.focus();
+    btn.textContent = '完成';
+    notice.classList.add('hidden');
+  }
+}
+
+// ── Workflow 逐段编辑 ──
+const WF_FIELDS = ['trigger','human_action','ai_response','anti_example','verification_prompt'];
+
+function toggleEditWorkflow(idx, wi) {
+  const btn    = document.getElementById(`editWfBtn-${idx}-${wi}`);
+  const notice = document.getElementById(`wfNotice-${idx}-${wi}`);
+  const editing = btn.textContent === '完成';
+
+  if (editing) {
+    const wf = window._profiles[idx].workflow_details[wi];
+    const profileId = window._profiles[idx].id;
+    const payload = { title: wf.title, id: wf.id };
+    WF_FIELDS.forEach(key => {
+      payload[key] = document.getElementById(`wf-editor-${idx}-${wi}-${key}`).value;
+    });
+
+    btn.textContent = '保存中…';
+    btn.classList.add('saving');
+    fetch(`/profiles/${profileId}/workflows/${wf.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.ok) {
+        // 更新内存中的数据并刷新显示区
+        WF_FIELDS.forEach(key => {
+          window._profiles[idx].workflow_details[wi][key] = payload[key];
+          const el = document.getElementById(`wf-text-${idx}-${wi}-${key}`);
+          if (el) el.textContent = payload[key];
+          const ed = document.getElementById(`wf-editor-${idx}-${wi}-${key}`);
+          if (ed) { ed.classList.add('hidden'); }
+        });
+        WF_FIELDS.forEach(key => {
+          const el = document.getElementById(`wf-text-${idx}-${wi}-${key}`);
+          if (el) el.classList.remove('hidden');
+        });
+        btn.textContent = '编辑';
+        showNotice(notice, '已保存', 'ok');
+      } else {
+        btn.textContent = '完成';
+        showNotice(notice, data.error || '保存失败', 'err');
+      }
+    })
+    .catch(() => {
+      btn.textContent = '完成';
+      showNotice(notice, '无法连接服务器', 'err');
+    })
+    .finally(() => btn.classList.remove('saving'));
+  } else {
+    // 进入编辑：显示 editor，隐藏 display
+    WF_FIELDS.forEach(key => {
+      const text   = document.getElementById(`wf-text-${idx}-${wi}-${key}`);
+      const editor = document.getElementById(`wf-editor-${idx}-${wi}-${key}`);
+      if (text)   text.classList.add('hidden');
+      if (editor) { editor.classList.remove('hidden'); editor.style.height = 'auto'; editor.style.height = editor.scrollHeight + 'px'; }
+    });
+    btn.textContent = '完成';
+    notice.classList.add('hidden');
+  }
+}
+
+// ── 激活 profile ──
+function activateProfile(profileId, target, projectDir, idx) {
+  const notice = document.getElementById(`activateNotice-${idx}`);
+  const t = target || document.getElementById(`projectTarget-${idx}`).value;
+  const dir = projectDir !== null ? projectDir : document.getElementById(`projectDir-${idx}`).value.trim();
+  if (t !== 'claude' && !dir) { showNotice(notice, '请填写项目路径', 'err'); return; }
+  fetch(`/profiles/${profileId}/activate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ target: t, project_dir: dir })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.ok) {
+      const paths = (data.outputs || []).map(o => o.path || o.name).join('、');
+      showNotice(notice, `已激活 → ${paths}`, 'ok');
+      // 刷新档案页更新 bound 标记
+      setTimeout(() => openProfilesPage(), 1200);
+    } else {
+      showNotice(notice, data.error || '激活失败', 'err');
+    }
+  })
+  .catch(() => showNotice(notice, '无法连接服务器', 'err'));
+}
+
+// ── 项目记忆 ──
+function toggleNewProjectForm(idx) {
+  const wrap = document.getElementById(`projectFormWrap-${idx}`);
+  wrap.classList.toggle('hidden');
+}
+
+function saveProjectMemory(profileId, idx) {
+  const notice = document.getElementById(`pmNotice-${idx}`);
+  const dir = document.getElementById(`pmDir-${idx}`).value.trim();
+  if (!dir) { showNotice(notice, '请填写项目路径', 'err'); return; }
+  const body = {
+    project_dir:      dir,
+    profile_id:       profileId,
+    name:             document.getElementById(`pmName-${idx}`).value.trim(),
+    tech_stack:       document.getElementById(`pmTech-${idx}`).value.trim(),
+    conventions:      document.getElementById(`pmConv-${idx}`).value.trim(),
+    gotcha:           document.getElementById(`pmGotcha-${idx}`).value.trim(),
+    persona_override: document.getElementById(`pmPersona-${idx}`).value.trim(),
+  };
+  fetch('/projects', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.ok) {
+      showNotice(notice, `已写入 ${data.path}`, 'ok');
+      setTimeout(() => { toggleNewProjectForm(idx); openProfilesPage(); }, 1200);
+    } else {
+      showNotice(notice, data.error || '保存失败', 'err');
+    }
+  })
+  .catch(() => showNotice(notice, '无法连接服务器', 'err'));
+}
+
+function showNotice(el, msg, type) {
+  el.textContent = msg;
+  el.className = `profile-save-notice ${type}`;
+  setTimeout(() => el.classList.add('hidden'), 3000);
 }
 </script>
 </body>

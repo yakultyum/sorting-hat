@@ -196,53 +196,22 @@ cd "$SKILL_DIR/web" && python3 server.py --target claude
 ```
 ✓  分院完成。
    [按选择列出写入的文件路径，或提示复制 system prompt]
-   随时调用 /sorting-hat 修改某一个维度。
+   人设已生效。如需为具体项目添加记忆，在档案页选择该 profile → 项目记忆 → 新建。
 ```
 
 ---
 
-## 路径 B：修改人设
+## 路径 B：档案管理与人设编辑
 
-### 第一步：启动修改模式
+启动服务器后，用户可在网页「我的档案」页面：
 
-不要手动编辑 `persona.md`。启动同一个网页服务，让网页读取 `persona.answers.json` 或 `sorting-hat.answers.json`，用户在浏览器里选择要修改的维度。
+- 查看所有已保存的 profile
+- 直接编辑任意 profile 的人设文本（`prompt.md`）
+- 编辑 workflow 的各个字段
+- 将 profile 激活到 Claude Code（全局）或指定项目的 Cursor / Windsurf
+- 为项目新建记忆文件（`.sorting-hat/project.md`）
 
-```bash
-cd "$SKILL_DIR/web" && python3 server.py --target claude
-```
-
-上方命令是 Claude Code 输出适配器示例。如果用户要修改 Cursor/Windsurf/全部生成输出，按路径 A 的目标参数替换 `--target` 和 `--project-dir`。
-
-如果 `/state` 返回“未找到已保存的答题数据”，停止修改流程，提示用户先完整分院一次；不要从 `persona.md` 反推答案。
-
-### 第二步：用户在网页中选择维度
-
-网页首页点击「修改已有维度」，会读取 `/state` 返回的原始答题数据，然后展示可修改维度：
-
-- 推理深度
-- 反馈方式
-- 问题解法
-- 情绪底色
-- 温暖/直率
-- 信息密度
-- 格式偏好
-- 调节焦点
-- 专业领域
-- 称呼
-- 角色融合
-
-### 第三步：局部重问，整体重算
-
-网页只重问该维度对应题目，但保存时使用完整 answers JSON 重新生成整份 persona。不要做 Markdown 局部替换。
-
-### 第四步：写回与备份
-
-保存后 server.py 会：
-
-1. 备份旧配置为同名 `.bak`
-2. 写入新的 persona/prompt 文件
-3. 同步更新原始答题 JSON
-4. 在网页和终端显示写入路径
+所有改动通过 `PUT /profiles/<id>/prompt`、`PUT /profiles/<id>/workflows/<wid>`、`POST /profiles/<id>/activate`、`POST /projects` 端点完成，不走 `/save`，服务器不会自动关闭。
 
 ---
 
@@ -290,11 +259,13 @@ cd "$SKILL_DIR/web" && python3 server.py use "<profile-id-or-name>"
 
 ## 路径 F：沉淀 workflow（/sorting-hat reflect）
 
-`reflect` 用于沉淀“人如何主导 AI”的协作方式，而不是保存聊天原文。每条 workflow 应包含：触发场景、人的主导动作、AI 应如何响应、反例、验证 prompt。
+`reflect` 用于沉淀”人如何主导 AI”的协作方式，而不是保存聊天原文。每条 workflow 包含：触发场景、人的主导动作、AI 应如何响应、反例、验证 prompt。
 
-最小流程：
+**核心原则：提炼由 Claude 完成，server.py 只负责写文件。** 不要用关键词匹配或硬编码规则代替真正的分析。
 
-1. 用户只需要调用：
+### 最小流程
+
+1. 用户调用：
 
 ```text
 /sorting-hat reflect
@@ -302,27 +273,90 @@ cd "$SKILL_DIR/web" && python3 server.py use "<profile-id-or-name>"
 
 2. 读取 `~/.sorting-hat/index.json`；如果没有 profile，停止并引导用户先运行 `/sorting-hat` 创建 profile。
 3. 展示可选 profile，让用户选择要挂载的 profile；若用户已在指令里写明 profile 名称，先按名称匹配。
-4. 询问 workflow 标题，例如「验证优先」「连续优化」「代码审查收敛」。
-5. 请用户粘贴一段复盘内容，或让用户确认“从当前会话摘要中提炼”。不要保存完整聊天原文。
-6. 将复盘内容写入临时文件，skill 内部执行：
+4. 询问 workflow 标题（例如「验证优先」「连续优化」「代码审查收敛」）。
+5. **由 Claude 直接分析当前对话上下文，提炼出五个字段：**
+
+   - **触发场景**：什么情况下这条规则应该生效（描述具体场景，不要泛化）
+   - **人的主导动作**：用户在这个场景里做了什么、要求了什么
+   - **AI 应如何响应**：AI 应该采取的具体行动，用通用原则表达，不绑定当次情景
+   - **反例**：AI 不该做什么，越具体越好
+   - **验证 prompt**：一句可以直接用来检验 AI 是否遵守这条规则的 prompt
+
+   提炼要求：
+   - 聚焦「协作方式」，不保存任务内容本身
+   - 用通用原则表达，不直接复述对话原文
+   - 如果当前对话没有足够信息，直接告知用户，不要编造
+
+6. 把提炼结果展示给用户确认，用户可以修改任意字段。
+
+7. 用户确认后，skill 执行写入：
 
 ```bash
-cd "$SKILL_DIR/web" && python3 server.py reflect "<profile-id-or-name>" --source reflection.txt --title "验证优先"
+cd “$SKILL_DIR/web” && python3 server.py reflect “<profile-id>” \
+  --title “验证优先” \
+  --trigger “<触发场景>” \
+  --human-action “<人的主导动作>” \
+  --ai-response “<AI 应如何响应>” \
+  --anti-example “<反例>” \
+  --verification-prompt “<验证 prompt>”
 ```
 
-7. 生成文件位于 `~/.sorting-hat/profiles/<profile-id>/workflows/<workflow-id>.md`，并写回该 profile 的 `profile.json`。
-8. 展示生成的 workflow 摘要，明确列出：触发场景、人的主导动作、AI 应如何响应、反例、验证 prompt。
+8. workflow 写入 `~/.sorting-hat/profiles/<profile-id>/workflows/<workflow-id>.md`，在档案页「我的档案」中可随时查看和编辑。
 
-🔴 CHECKPOINT · reflect 保存前确认：保存前必须让用户确认 profile、workflow 标题和抽象规则摘要。用户确认前不要写入 workflows 目录。
+🔴 CHECKPOINT · reflect 保存前确认：必须让用户确认五个字段的内容。用户确认前不要执行写入命令。
 
-失败分支：
+### 失败分支
 
 | 情况 | 处理 |
 |---|---|
 | 没有任何 profile | 停止；提示先运行 `/sorting-hat` 创建 profile |
 | 用户没选 profile | 先展示 `/sorting-hat profiles` 结果，再让用户选择 |
-| 复盘内容为空 | 停止；要求用户补充要沉淀的协作经验 |
-| 生成内容像聊天记录摘录 | 停止；重新抽象为规则，不保存原文 |
+| 当前对话没有可提炼的协作规则 | 直接告知用户，不要编造内容 |
+| 提炼结果像聊天原文摘要 | 重新抽象为可复用规则，不保存原文叙述 |
+
+---
+
+## 路径 G：项目记忆管理
+
+项目记忆文件位于 `<project>/.sorting-hat/project.md`，独立于 Claude Code 的 `.claude/` 目录，适用于所有支持文件读取的 AI agent。
+
+### 文件结构
+
+```markdown
+# 项目名称
+
+> 由 Sorting Hat 生成的项目记忆文件。AI 在处理本项目任务前应读取本文件。
+
+## 技术栈
+
+Python 3.12, FastAPI, PostgreSQL, Docker
+
+## 约定
+
+文件命名用 snake_case，注释用中文，PR 前必须跑 pytest
+
+## Gotcha
+
+不要动 legacy/ 目录，数据库 migration 必须向后兼容
+
+## 人设覆盖
+
+在这个项目里，回复更简洁，不需要解释基础概念
+```
+
+### 如何触发读取
+
+`persona.md` 末尾固定包含以下指令：
+
+> 每次开始任务前，检查当前工作目录下是否存在 `.sorting-hat/project.md`。如果存在，读取其内容，并以其中的设置覆盖上方对应的行为准则。
+
+AI agent 启动时加载全局 `persona.md`，处理项目任务前主动检查并读取项目记忆。
+
+### 创建和编辑
+
+- **网页**：档案页 → 展开 profile → 「项目记忆」区块 → 新建
+- **服务端**：`POST /projects`，接收 `{ project_dir, profile_id, name, tech_stack, conventions, gotcha, persona_override }`
+- **读取**：`GET /projects?dir=<path>` 返回解析后的结构化字段
 
 ---
 
