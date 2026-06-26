@@ -478,6 +478,26 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 enriched.append(item)
             self.send_json(enriched)
             return
+        # GET /projects/all — 所有项目记忆（跨 profile）
+        if path == "/projects/all":
+            store_dir = DEFAULT_PROFILE_STORE_DIR.expanduser()
+            seen_dirs = set()
+            projects = []
+            for p in list_profiles(store_dir):
+                for b in p.get("bound_projects", []):
+                    d = b.get("dir", "")
+                    if d and d not in seen_dirs:
+                        seen_dirs.add(d)
+                        project_file = Path(d).expanduser() / ".sorting-hat" / "project.md"
+                        if project_file.exists():
+                            text = project_file.read_text(encoding="utf-8")
+                            fields = parse_project_fields(text)
+                            projects.append({"dir": d, "path": str(project_file), **fields})
+                        else:
+                            projects.append({"dir": d, "path": None, "name": Path(d).expanduser().name,
+                                             "tech_stack": "", "conventions": "", "gotcha": "", "persona_override": ""})
+            self.send_json(projects)
+            return
         # GET /projects?dir=<path>
         if path == "/projects":
             from urllib.parse import urlparse, parse_qs

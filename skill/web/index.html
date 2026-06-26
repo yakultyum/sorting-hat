@@ -1095,6 +1095,34 @@
       <button onclick="show('pageWelcome')" style="font-family:'Cinzel',serif;font-size:0.68rem;letter-spacing:0.1em;background:transparent;border:none;color:var(--text-muted);cursor:pointer;padding:0.2rem 0;">← 返回</button>
     </div>
     <div id="profilesList"></div>
+
+    <!-- 全局项目记忆区块 -->
+    <div style="margin-top:1.6rem;">
+      <div class="profiles-header" style="margin-bottom:0.8rem;">
+        <h2>✦ 项目记忆</h2>
+        <button class="profile-edit-btn" onclick="toggleGlobalProjectForm()">+ 新建</button>
+      </div>
+      <div id="globalProjectFormWrap" class="hidden" style="margin-bottom:1rem;padding:1rem;background:var(--bg-elevated);border:1px solid var(--border-dim);border-radius:3px;">
+        <div class="project-field-label">项目路径</div>
+        <input type="text" id="gpmDir" class="open-input" style="min-height:0;padding:0.5rem 0.8rem;font-size:0.85rem;margin-bottom:0;" placeholder="~/work/my-project">
+        <div class="project-field-label">项目名称（可选）</div>
+        <input type="text" id="gpmName" class="open-input" style="min-height:0;padding:0.5rem 0.8rem;font-size:0.85rem;margin-bottom:0;" placeholder="My Project">
+        <div class="project-field-label">技术栈</div>
+        <textarea id="gpmTech" class="workflow-field-editor" rows="2" placeholder="Python 3.12, FastAPI, PostgreSQL, Docker"></textarea>
+        <div class="project-field-label">约定</div>
+        <textarea id="gpmConv" class="workflow-field-editor" rows="3" placeholder="文件命名用 snake_case，注释用中文，PR 前必须跑 pytest"></textarea>
+        <div class="project-field-label">Gotcha</div>
+        <textarea id="gpmGotcha" class="workflow-field-editor" rows="2" placeholder="不要动 legacy/ 目录，数据库 migration 必须向后兼容"></textarea>
+        <div class="project-field-label">人设覆盖（可选）</div>
+        <textarea id="gpmPersona" class="workflow-field-editor" rows="3" placeholder="在这个项目里，回复更简洁，不需要解释基础概念"></textarea>
+        <div class="profile-save-notice hidden" id="gpmNotice" style="margin-top:0.5rem;"></div>
+        <div style="display:flex;gap:0.5rem;margin-top:0.8rem;">
+          <button class="profile-edit-btn" onclick="toggleGlobalProjectForm()">取消</button>
+          <button class="profile-edit-btn" style="border-color:var(--border-gold);color:var(--text-secondary);" onclick="saveGlobalProjectMemory()">保存项目记忆</button>
+        </div>
+      </div>
+      <div id="projectMemoryList"></div>
+    </div>
   </div>
 
 </div>
@@ -2414,6 +2442,14 @@ function openProfilesPage() {
     .catch(() => {
       container.innerHTML = '<p class="profiles-empty">无法连接本地服务器。<br>请确认已运行 python3 server.py，再刷新页面。</p>';
     });
+
+  fetch('/projects/all')
+    .then(r => r.json())
+    .then(projects => renderProjectMemoryList(projects))
+    .catch(() => {
+      document.getElementById('projectMemoryList').innerHTML =
+        '<p style="font-size:0.82rem;color:var(--text-muted);padding:0.5rem 0;">无法读取项目记忆列表。</p>';
+    });
 }
 
 function renderProfiles(profiles) {
@@ -2472,7 +2508,6 @@ function renderProfiles(profiles) {
 
         ${workflowsHtml}
         ${buildActivateSection(p, idx)}
-        ${buildProjectMemorySection(p, idx)}
       </div>
     `;
     container.appendChild(card);
@@ -2781,6 +2816,160 @@ function saveProjectMemory(profileId, idx) {
     if (data.ok) {
       showNotice(notice, `已写入 ${data.path}`, 'ok');
       setTimeout(() => { toggleNewProjectForm(idx); openProfilesPage(); }, 1200);
+    } else {
+      showNotice(notice, data.error || '保存失败', 'err');
+    }
+  })
+  .catch(() => showNotice(notice, '无法连接服务器', 'err'));
+}
+
+// ── 全局项目记忆 ──
+const PM_FIELDS = [
+  { key: 'tech_stack',       label: '技术栈' },
+  { key: 'conventions',      label: '约定' },
+  { key: 'gotcha',           label: 'Gotcha' },
+  { key: 'persona_override', label: '人设覆盖' },
+];
+
+function renderProjectMemoryList(projects) {
+  const container = document.getElementById('projectMemoryList');
+  if (!projects || projects.length === 0) {
+    container.innerHTML = '<p style="font-size:0.82rem;color:var(--text-muted);padding:0.4rem 0;">还没有任何项目记忆。点「+ 新建」为项目创建记忆文件。</p>';
+    return;
+  }
+  window._projects = projects;
+  container.innerHTML = '';
+  projects.forEach((pm, pi) => {
+    const bodyId    = `pmcard-body-${pi}`;
+    const chevronId = `pmcard-chevron-${pi}`;
+    const hasFile   = !!pm.path;
+    const fieldsHtml = PM_FIELDS.map(f => {
+      const val = pm[f.key] || '';
+      return `
+        <div class="project-field-label">${f.label}</div>
+        <div class="workflow-field-text" id="pmfield-text-${pi}-${f.key}">${escapeForAttr(val) || '<span style="color:var(--text-muted);font-style:italic;">未填写</span>'}</div>
+        <textarea class="workflow-field-editor hidden" id="pmfield-editor-${pi}-${f.key}" rows="2">${escapeForAttr(val)}</textarea>
+      `;
+    }).join('');
+
+    const card = document.createElement('div');
+    card.className = 'profile-card';
+    card.style.marginBottom = '0.6rem';
+    card.innerHTML = `
+      <div class="profile-card-header" onclick="toggleProfileCard('${bodyId}','${chevronId}')">
+        <div class="profile-card-title" style="font-size:0.8rem;">
+          ${escapeForAttr(pm.name || pm.dir)}
+          ${hasFile ? '' : '<span style="font-size:0.62rem;color:var(--red-soft);border:1px solid var(--red-soft);padding:0.1rem 0.35rem;border-radius:2px;margin-left:0.4rem;">无文件</span>'}
+        </div>
+        <div style="display:flex;align-items:center;gap:0.8rem;">
+          <span class="profile-card-meta" style="font-size:0.72rem;">${pm.dir}</span>
+          <span class="profile-card-chevron" id="${chevronId}">▼</span>
+        </div>
+      </div>
+      <div class="profile-card-body hidden" id="${bodyId}">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.6rem;">
+          <span style="font-size:0.72rem;color:var(--text-muted);">${pm.path || '尚未生成文件'}</span>
+          <button class="profile-edit-btn" id="pmedit-btn-${pi}" onclick="toggleEditProjectMemory(${pi})">编辑</button>
+        </div>
+        ${fieldsHtml}
+        <div class="profile-save-notice hidden" id="pmedit-notice-${pi}"></div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function toggleEditProjectMemory(pi) {
+  const btn    = document.getElementById(`pmedit-btn-${pi}`);
+  const notice = document.getElementById(`pmedit-notice-${pi}`);
+  const editing = btn.textContent === '完成';
+
+  if (editing) {
+    const pm  = window._projects[pi];
+    const dir = pm.dir;
+    const body = { project_dir: dir };
+    PM_FIELDS.forEach(f => {
+      body[f.key] = document.getElementById(`pmfield-editor-${pi}-${f.key}`).value.trim();
+    });
+    body.name = pm.name || '';
+    btn.textContent = '保存中…';
+    btn.classList.add('saving');
+    fetch('/projects', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.ok) {
+        PM_FIELDS.forEach(f => {
+          const val = body[f.key];
+          window._projects[pi][f.key] = val;
+          const el = document.getElementById(`pmfield-text-${pi}-${f.key}`);
+          if (el) el.innerHTML = escapeForAttr(val) || '<span style="color:var(--text-muted);font-style:italic;">未填写</span>';
+          const ed = document.getElementById(`pmfield-editor-${pi}-${f.key}`);
+          if (ed) ed.classList.add('hidden');
+        });
+        PM_FIELDS.forEach(f => {
+          const el = document.getElementById(`pmfield-text-${pi}-${f.key}`);
+          if (el) el.classList.remove('hidden');
+        });
+        btn.textContent = '编辑';
+        showNotice(notice, '已保存', 'ok');
+      } else {
+        btn.textContent = '完成';
+        showNotice(notice, data.error || '保存失败', 'err');
+      }
+    })
+    .catch(() => { btn.textContent = '完成'; showNotice(notice, '无法连接服务器', 'err'); })
+    .finally(() => btn.classList.remove('saving'));
+  } else {
+    PM_FIELDS.forEach(f => {
+      const text   = document.getElementById(`pmfield-text-${pi}-${f.key}`);
+      const editor = document.getElementById(`pmfield-editor-${pi}-${f.key}`);
+      if (text)   text.classList.add('hidden');
+      if (editor) { editor.classList.remove('hidden'); editor.style.height = 'auto'; editor.style.height = editor.scrollHeight + 'px'; }
+    });
+    btn.textContent = '完成';
+    notice.classList.add('hidden');
+  }
+}
+
+function toggleGlobalProjectForm() {
+  const wrap = document.getElementById('globalProjectFormWrap');
+  const isHidden = wrap.classList.contains('hidden');
+  wrap.classList.toggle('hidden', !isHidden);
+  if (isHidden) {
+    ['gpmDir','gpmName','gpmTech','gpmConv','gpmGotcha','gpmPersona'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    document.getElementById('gpmNotice').classList.add('hidden');
+  }
+}
+
+function saveGlobalProjectMemory() {
+  const notice = document.getElementById('gpmNotice');
+  const dir    = document.getElementById('gpmDir').value.trim();
+  if (!dir) { showNotice(notice, '请填写项目路径', 'err'); return; }
+  const body = {
+    project_dir:      dir,
+    name:             document.getElementById('gpmName').value.trim(),
+    tech_stack:       document.getElementById('gpmTech').value.trim(),
+    conventions:      document.getElementById('gpmConv').value.trim(),
+    gotcha:           document.getElementById('gpmGotcha').value.trim(),
+    persona_override: document.getElementById('gpmPersona').value.trim(),
+  };
+  fetch('/projects', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.ok) {
+      showNotice(notice, `已写入 ${data.path}`, 'ok');
+      setTimeout(() => { toggleGlobalProjectForm(); openProfilesPage(); }, 1000);
     } else {
       showNotice(notice, data.error || '保存失败', 'err');
     }
