@@ -153,6 +153,8 @@ scripts/install-skill.sh --dest ~/.cursor/skills --force
 
 ### d. 档案管理 UI
 
+不启动服务器时，可以用 `/sorting-hat profiles` 在终端列出所有已保存的 profile；用 `/sorting-hat use <profile>` 临时采用某个人设。
+
 启动服务器后，点击「我的档案」进入档案管理页：
 
 **查看所有 profile**：名称、版本（简易 / 深度 / 手写）、适用场景数，折叠卡片列表。

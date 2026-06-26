@@ -182,6 +182,8 @@ AI 进入该项目时自动读取
 
 ## 本地存储结构
 
+所有 profile 保存在 `~/.sorting-hat/profiles`，通过 `~/.sorting-hat/index.json` 索引。
+
 ```text
 ~/.sorting-hat/
   index.json                          ← profile 目录和默认值
