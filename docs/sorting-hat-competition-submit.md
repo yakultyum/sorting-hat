@@ -161,8 +161,11 @@ scripts/install-skill.sh --dest ~/.cursor/skills --force
 - 查看并编辑人设描述全文（`prompt.md`）
 - 查看并逐段编辑 workflow（触发场景 / 主导动作 / AI 响应 / 反例 / 验证 prompt）
 - 一键激活到 Claude Code，或输入项目路径激活到 Cursor / Windsurf
-- 查看已绑定的项目列表
-- 新建项目记忆
+
+**档案页底部「项目记忆」全局区块**（所有 profile 共享）：
+- 列出系统里所有已创建的项目记忆
+- 点「+ 新建」直接创建，无需关联到某个 profile
+- 每条项目记忆可展开查看和编辑（技术栈、约定、Gotcha、人设覆盖）
 
 ### e. 两层记忆架构
 
@@ -170,13 +173,13 @@ scripts/install-skill.sh --dest ~/.cursor/skills --force
 ~/.claude/memory/persona.md          ← 全局基础人设
                                         末尾包含项目记忆读取指令
 
-<project>/.sorting-hat/project.md   ← 项目记忆
-                                        技术栈 + 约定 + Gotcha + 人设覆盖
+<project>/.sorting-hat/project.md   ← 项目记忆（所有 profile 共享）
+                                        技术栈 + 约定 + Gotcha + 人设覆盖 + 协作规则
 ```
 
 AI agent 启动时加载全局 persona，处理项目任务前主动检查并读取项目记忆。同一套基础人设，在不同项目里自动适配不同上下文。**这套设计不绑定 Claude Code，适用于所有支持文件读取的 AI agent。**
 
-在档案页「项目记忆 → 新建」，填写：
+项目记忆与 profile 的关系：**一个项目只有一份 `project.md`，所有 profile 进入该项目都读同一份**，不按 profile 隔离。在档案页「项目记忆 → 新建」，填写：
 - 项目路径
 - 技术栈
 - 约定（命名规范、提交规范等）
@@ -230,14 +233,16 @@ AI agent 启动时加载全局 persona，处理项目任务前主动检查并读
 #### 为项目添加记忆
 
 ```text
-档案页 → 展开 profile → 项目记忆 → 新建
+档案页 → 底部「项目记忆」区块 → + 新建
   ↓
 填写项目路径、技术栈、约定、Gotcha、人设覆盖
   ↓
 写入 <project>/.sorting-hat/project.md
   ↓
-AI 进入该项目时自动读取，覆盖全局人设对应准则
+所有 profile 进入该项目时均自动读取，覆盖全局人设对应准则
 ```
+
+也可通过 `/sorting-hat init` 在终端完成——生成 CLAUDE.md 的同时自动写入 `.sorting-hat/project.md`，两个文件共用一次问答。
 
 #### 管理和更新人设
 
@@ -343,7 +348,8 @@ AI 进入该项目时自动读取，覆盖全局人设对应准则
   - 编辑人设文本（`PUT /profiles/<id>/prompt`）
   - 编辑 workflow 字段（`PUT /profiles/<id>/workflows/<wid>`）
   - 创建项目记忆（`POST /projects`）
-  - 读取项目记忆（`GET /projects?dir=<path>`）
+  - 读取所有项目记忆（`GET /projects/all`，跨 profile 全局视图）
+  - 读取单个项目记忆（`GET /projects?dir=<path>`）
 - **存储**：全部本地，不上传服务器
 - **测试**：单元测试覆盖目标解析、备份、profile store、profiles/use/reflect
 - **发布检查**：脚本校验资源完整、web 与 skill/web 同步、Python 可编译、JSON 有效
@@ -366,8 +372,8 @@ AI 进入该项目时自动读取，覆盖全局人设对应准则
 - [x] 人设文本直接编辑（`prompt.md`）
 - [x] Workflow 逐段字段编辑
 - [x] 激活到工具 / 项目（`POST /profiles/<id>/activate`）
-- [x] 两层记忆架构（全局 persona.md + 项目 `.sorting-hat/project.md`）
-- [x] 项目记忆管理（创建、读取、绑定到 profile）
+- [x] 两层记忆架构（全局 persona.md + 项目 `.sorting-hat/project.md`，所有 profile 共享项目记忆）
+- [x] 项目记忆管理（全局区块展示、新建、编辑；`/sorting-hat init` 同时生成 `project.md`）
 - [x] profiles / use / reflect CLI 命令
 - [x] 项目初始化（`/sorting-hat init`）
 - [x] 发布前检查脚本和安装脚本

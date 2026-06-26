@@ -289,7 +289,7 @@ AI 扫描目录结构作为背景参考
 
 #### 功能 6：项目初始化（/sorting-hat init）
 
-通过终端对话为任意项目生成 CLAUDE.md，让 AI 在进入该项目时自动了解上下文。
+通过终端对话为任意项目生成 CLAUDE.md，同时自动写入 `.sorting-hat/project.md`，两个文件共用一次问答收集的信息。
 
 调用方式：
 - `/sorting-hat init` — 为当前目录生成
@@ -303,9 +303,28 @@ AI 扫描目录结构作为背景参考
 4. **项目约定**：文件命名规范、文档格式要求、注释语言
 5. **Gotcha**：容易踩的坑、特殊依赖、注意事项
 
-全程通过 `AskUserQuestion` 点选 + 文字输入，可跳过，完成后展示预览确认再写入。
+完成后写入两个文件：
+- `CLAUDE.md`：供 Claude Code 自动加载的项目上下文
+- `.sorting-hat/project.md`：供所有 AI agent 读取的项目记忆，在档案页全局区块可见和编辑
 
-再次调用 `/sorting-hat` 时，用户可以只修改某一个维度（如"我最近更需要直接反馈，把反馈方式改一下"），无需重新完成整个问卷。
+#### 功能 7：两层记忆架构
+
+```
+~/.claude/memory/persona.md          ← 全局基础人设（通用行为准则）
+                                        末尾固定包含：
+                                        "每次开始任务前检查 .sorting-hat/project.md
+                                         如果存在，读取并覆盖对应准则"
+
+<project>/.sorting-hat/project.md   ← 项目记忆（所有 profile 共享）
+                                        技术栈、约定、Gotcha、人设覆盖、协作规则
+```
+
+**项目记忆与 profile 的关系**：一个项目只有一份 `project.md`，所有 profile 进入该项目都读同一份，不按 profile 隔离。这套设计独立于 Claude Code，适用于所有支持文件读取的 AI agent。
+
+项目记忆管理入口：
+- **网页档案页底部**：全局「项目记忆」区块，展示系统里所有已创建的项目记忆，可新建和编辑
+- **终端**：`/sorting-hat init` 自动生成
+- **API**：`POST /projects`、`GET /projects/all`、`GET /projects?dir=<path>`
 
 ### 7.3 技术实现
 
@@ -412,38 +431,35 @@ cp sorting-hat/skill/SKILL.md ~/.claude/skills/sorting-hat/SKILL.md
 
 ## 8. 发布计划
 
-### 8.1 MVP（第一版，约 2 周）
+### 8.1 已完成
 
-**目标**：核心功能跑通，支持种子用户测试
+- [x] 简易版 / 深度版问卷网页（七个心理学框架）
+- [x] 本地 Python 服务器（`web/server.py`，端口 7432）
+- [x] SKILL.md 实现（人设分院 + 项目初始化 + reflect + profiles/use 命令）
+- [x] 交互偏好题（喜欢 / 不喜欢，自然语言填写）
+- [x] 手写创建 profile（跳过问卷）
+- [x] 多目标输出（Claude Code / Cursor / Windsurf / Generic / All）
+- [x] 全局 profile 仓库（`~/.sorting-hat/`）
+- [x] 网页档案管理 UI（查看、编辑人设和 workflow、激活到工具）
+- [x] /sorting-hat reflect：Claude 直接分析当前对话提炼 workflow，无需用户粘贴
+- [x] 两层记忆架构（全局 persona.md + 项目 `.sorting-hat/project.md`）
+- [x] 项目记忆全局视图（所有 profile 共享，档案页底部独立区块）
+- [x] `/sorting-hat init` 同时生成 CLAUDE.md 和 `.sorting-hat/project.md`
+- [x] 激活到项目时自动把 workflow 写入 project.md 协作规则段落
 
-- [x] 简易版问卷网页（`web/index.html`）
-- [x] 本地 Python 服务器（`web/server.py`）
-- [x] 深度版问卷（31 题，网页内实现）
-- [x] SKILL.md 实现（人设分院 + 修改人设 + 项目初始化）
-- [ ] 三层转化规则完整验证（种子用户测试）
-- [ ] 按维度局部更新流程测试
-- [ ] 首批 10 名种子用户测试
+### 8.2 未来探索方向
 
-### 8.2 第二版（约 1 个月后）
+- profile 导入 / 导出（团队共享协作套装）
+- 团队级人设：同一项目中不同角色使用不同 AI 协作方式
+- 人设漂移检测：当用户行为和当前 profile 不匹配时提示更新
+- AI 搭子形象 × 桌面桌宠：把 profile 情绪底色映射为视觉角色形象
+- 从历史对话自动蒸馏 workflow（当前需要手动调用 reflect）
 
-**目标**：覆盖深度用户需求，提升精度
+### 8.3 明确不做的事
 
-- [ ] 深度版问卷（31 题）完整实现
-- [ ] 完成率优化（基于 MVP 测试数据）
-- [ ] 人设可视化摘要（更清晰地展示每个维度的设置）
-- [ ] 英文版本
-
-### 8.3 未来探索方向
-
-- **团队级人设**：同一个 AI，根据对话对象（老板 / 同事 / 外部用户）切换风格
-- **人设漂移检测**：检测用户行为是否与当前人设不匹配，主动提示更新
-- **角色市场**：分享和使用社区创建的人设模板
-
-### 8.4 明确不做的事
-
-- 不提供独立 Web 应用或 SaaS 版本（聚焦 Claude Code 本地生态）
-- 不支持多套人设并行切换（一个用户一套，保持简洁）
+- 不提供独立 Web 应用或 SaaS 版本（本地优先）
 - 不收集或上传用户数据，所有内容本地存储
+- 不把心理标签当作结论，只作为生成 AI 行为规则的中间层
 
 ---
 
